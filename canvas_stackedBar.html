@@ -26,12 +26,19 @@
         <br />
         <br/> Data Set :
         <textarea cols="50" rows="10" id="mData">
-{"data":[
-    [10, 60, 10],
-    [90, 90, 40],
-    [70, 40, 70],
-    [40, 30, 50]
-]}
+{   
+    "title":{
+        "title":"1분기 지출",
+        "label":["1월","2월","3월","4월"],
+        "legend":["자재비","인건비","가공비"]
+    },
+    "data":[
+        [10, 60, 10],
+        [90, 90, 40],
+        [70, 40, 70],
+        [40, 30, 50]
+    ]
+}
         </textarea>
     </div>
 
@@ -60,7 +67,7 @@
                 var jsonData = $('#mData').val();
                 var dataSet = JSON.parse(jsonData);
 
-                fnStackedBar(ctx, "tutorial", dataSet.data);
+                fnStackedBar(ctx, "tutorial", dataSet);
 
             })
 
@@ -83,17 +90,18 @@
                 dataMaxHeight: 0,
                 boxRightMargin: 0,
                 boxWidth: 0,
-                guideColor: 0,
+                guideColorAlpha: 0,
+                guideFillYN: 'N',
                 ctx: null
             };
 
             //# set default config value (Box Total height, Box col count, Box margin)
-            var fnSetConfig = function (w, h, dataprop) {
+            var fnSetConfig = function (w, h, dataprop, OPT) {
                 var ctxTotalWidth = w;		//전체 Canvas 가로 크기
                 var ctxTotalHeight = h;		//전체 Canvas 세로 크기
 
                 var ctxTopMargin = 30;			    //상단 여백
-                var ctxBottomMargin = 40;			//하단 여백
+                var ctxBottomMargin = 60;			//하단 여백
                 var ctxLeftMargin = 50;		        //좌 여백
                 var ctxRightMargin = 60;		    //우 여백
 
@@ -107,7 +115,7 @@
 
                 //box margin 동적 계산
                 var calcBoxWidth = (Math.round(ctxAvailableWidth / dataWidthCount));
-                var boxRightMargin = Math.floor(calcBoxWidth / 3);
+                var boxRightMargin = Math.floor(calcBoxWidth * 11 / 32); //      11/32 %
                 var boxWidth = calcBoxWidth - boxRightMargin;
 
                 CFG = {
@@ -125,9 +133,10 @@
                     dataMaxHeight: dataMaxHeight,
                     boxRightMargin: boxRightMargin,
                     boxWidth: boxWidth,
-                    guideColor: 0.25
+                    guideColorAlpha: OPT.GuideAlpha = typeof OPT.GuideAlpha !== 'undefined' ? OPT.GuideAlpha : 0.2,
+                    guideFillYN: OPT.GuideFillYN = typeof OPT.GuideFillYN !== 'undefined' ? OPT.GuideFillYN : 'N',
                 };
-                console.log(CFG);
+                //console.log(CFG);
             }
 
             //# make axis
@@ -137,6 +146,7 @@
                 ctx.beginPath();
                 ctx.moveTo(CFG.ctxLeftMargin, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
                 ctx.lineTo(CFG.ctxLeftMargin + CFG.ctxAvailableWidth, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
+                ctx.lineWidth = 0.6;
                 //ctx.closePath();
                 ctx.stroke();
                 //ctx.fill();
@@ -146,11 +156,11 @@
                 ctx.beginPath();
                 ctx.moveTo(CFG.ctxLeftMargin, CFG.ctxTopMargin);
                 ctx.lineTo(CFG.ctxLeftMargin, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
+                ctx.lineWidth = 0.6;
                 //ctx.closePath();
                 ctx.stroke();
 
             }
-
 
             //Draw background
             var fnDrawBackground = function (ctx, prop, rgb) {
@@ -161,7 +171,43 @@
             //RGBA be less color
             var fnMakeAlphaColor = function (rgba) {
                 var strRgb = rgba.substring(0, rgba.lastIndexOf(","));
-                return strRgb + ", " + CFG.guideColor + ")";
+                return strRgb + ", " + CFG.guideColorAlpha + ")";
+            }
+
+            var fnConvertRgbToHex = function (rgba) {
+                CFG.ctx.fillStyle = 'rgba(0, 0, 0, 0)';
+                // We're reusing the canvas, so fill it with something predictable
+                CFG.ctx.clearRect(0, 0, 1, 1);
+                CFG.ctx.fillStyle = rgba;
+                CFG.ctx.fillRect(0, 0, 1, 1);
+
+                var a = CFG.ctx.getImageData(0, 0, 1, 1).data;
+                // Sigh, you can't map() typed arrays
+                var hex = [0, 1, 2].map(function (i) { return fnByteToHex(a[i]) }).join('');
+                return '#' + hex;
+            }
+
+            var fnByteToHex = function (byte) {
+                return ('0' + byte.toString(16)).slice(-2);
+            }
+
+            //Draw Guide line
+            var fnDrawGuideLine = function (ctx, box1, box2, rgba) {
+                ctx.fillStyle = rgba;
+                ctx.beginPath();
+                ctx.moveTo(box1.RTTP.x, box1.RTTP.y);
+                ctx.lineTo(box2.LFTP.x, box2.LFTP.y);
+                ctx.lineTo(box2.LFBT.x, box2.LFBT.y);
+                ctx.lineTo(box1.RTBT.x, box1.RTBT.y);
+                //ctx.lineStyle = fnConvertRgbToHex(rgba);
+                if (CFG.guideFillYN == 'Y') {
+                    ctx.closePath();
+                    ctx.fill();
+                } else {
+                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = fnConvertRgbToHex(rgba);
+                    ctx.stroke();
+                }
             }
 
             //# make one box by Group
@@ -230,7 +276,7 @@
                     tmpXAxis += CFG.boxWidth + CFG.boxRightMargin;
                 }
 
-                console.log(BoxesAxis);
+                //console.log(BoxesAxis);
                 return BoxesAxis;
 
             }
@@ -257,71 +303,7 @@
                 return dataProp;
             }
 
-            //Main process    
-            var fnStackedBar = function (CTX, elementCanvasId, data) {
-                //canvas size setting
-                var eleCanvas = document.getElementById(elementCanvasId);
-                var CanvasWidth = eleCanvas.width;
-                var CanvasHeight = eleCanvas.height;
-
-                //#0. init Data Model : _MO
-                var _MO = {
-                    dtOrgDataSet: [],
-                    dtGroup: { maxValue: 0, colCnt: 0, rowCnt: 0 },
-                    dtBoxGroup: [],         //Group별 value의 합계 배열
-                    dtGroupPos: [],         //Group별 시작 Position, 가로/세로 크기 배열 attributes
-                    dtBoxPos: []            //개별 Box별 시작 Position, 가로/세로 크기 배열 attributes
-                }
-
-                _MO.dtOrgDataSet = data;
-
-                //#1. DataGroup
-                var dataSet = fnGetDataProp(data);
-                _MO.dtGroup = { maxValue: dataSet.maxValue, colCnt: dataSet.count, rowCnt: data[0].length };
-                _MO.dtBoxGroup = dataSet.valueGroup;
-
-                //#2. Global Config
-                fnSetConfig(CanvasWidth, CanvasHeight, { count: _MO.dtGroup.colCnt, maxValue: _MO.dtGroup.maxValue });
-
-                //#3. To set stdBarWidth
-                var BarWidth = CFG.boxWidth;        //
-                CFG.ctx = CTX;
-
-
-                //Set Default Configuration
-                //fnSetConfig(CanvasWidth, CanvasHeight, dataSet);
-
-                //Canvas arae
-                var prop = { X: 0, Y: 0, W: CanvasWidth, H: CanvasHeight };
-                fnDrawBackground(CTX, prop, "rgba(244, 245, 186, 0.64)");
-
-                //real chart arae
-                //prop = { X: CFG.ctxStartX, Y: CFG.ctxStartY, W: CFG.ctxAvailableWidth, H: CFG.ctxAvailableHeight };
-                //fnDrawBackground(CTX, prop, "rgba(244, 245, 136, 0.64)");
-
-                //Make Axis
-                fnDrawAxis(CTX);
-
-                //Make Box List
-                //Group별 위치/크기 설정
-                _MO.dtGroupPos = fnMakeGroupPosition(_MO.dtGroup.maxValue, _MO.dtBoxGroup);
-
-                //Group별 개별 Box drawing
-                for (var i = 0; i < _MO.dtGroupPos.length; i++) {
-                    prop = _MO.dtGroupPos[i];
-                    prop["orgData"] = _MO.dtOrgDataSet[i];
-                    prop["orgGroupSum"] = _MO.dtBoxGroup[i];
-
-                    _MO.dtBoxPos[i] = fnDrawBox(CTX, prop);
-                }
-                //console.log(_MO.dtBoxPos);
-
-                //Draw Box guide line
-                fnCallDrawGuide(CTX, _MO.dtBoxPos);
-
-                return _MO.dtGroupPos;
-            }
-
+            //Call draw function for guide line
             var fnCallDrawGuide = function (ctx, arrBoxAttr) {
                 var GuideXAxisCnt = arrBoxAttr.length;
                 var GuideYAxisCnt = 0;
@@ -334,18 +316,6 @@
                         fnDrawGuideLine(ctx, arrBoxAttr[i][j].point, arrBoxAttr[i + 1][j].point, arrBoxAttr[i][j].color);
                     }
                 }
-            }
-
-            var fnDrawGuideLine = function (ctx, box1, box2, rgba) {
-                ctx.fillStyle = rgba;
-                ctx.beginPath();
-                ctx.moveTo(box1.RTTP.x, box1.RTTP.y);
-                ctx.lineTo(box2.LFTP.x, box2.LFTP.y);
-                ctx.lineTo(box2.LFBT.x, box2.LFBT.y);
-                ctx.lineTo(box1.RTBT.x, box1.RTBT.y);
-                ctx.closePath();
-                //ctx.stroke();
-                ctx.fill();
             }
 
             //Box 4Point 설정
@@ -365,6 +335,136 @@
                 return point;
             }
 
+            var fnDrawLable = function (ctx, label, groupPos) {
+
+                var labelYPoint = CFG.ctxTopMargin + CFG.ctxAvailableHeight;
+                var labelXBasePoint = CFG.ctxLeftMargin;
+                var axisBaseLineHeight = 5;
+                var axisBaseLabelMarginX = 10;
+                var axisBaseLabelMarginY = 20;
+
+                for (var i = 0; i < groupPos.length; i++) {
+                    var axis = groupPos[i];
+                    var x = axis.X + Math.round(axis.W / 2);        //Group Box Start point + Box Width/2
+
+                    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+                    ctx.beginPath();
+                    ctx.moveTo(x, labelYPoint - axisBaseLineHeight);
+                    ctx.lineTo(x, labelYPoint + axisBaseLineHeight);
+                    ctx.lineWidth = 1;
+                    //ctx.closePath();
+                    ctx.stroke();
+
+                    ctx.font = 'italic 10pt Calibri';
+                    ctx.fillText(label[i], x - axisBaseLabelMarginX, labelYPoint + axisBaseLabelMarginY);
+                }
+
+            }
+
+            var fnDrawLegend = function (ctx, legend) {
+                var legendTopMargin = 24;
+                var legendTextWidth = 30;
+                var legendTextLeftMargin = 15;
+                var legendBoxHeight = 30;
+                var legendCnt = legend.length;
+                var labelYPoint = CFG.ctxTopMargin + CFG.ctxAvailableHeight + legendTopMargin;
+                var labelXBasePoint = CFG.ctxLeftMargin;
+                var legendBoxAreaWidth = Math.round(CFG.ctxAvailableWidth / legendCnt);
+                var legendBoxAreaWidthHalf = Math.floor(legendBoxAreaWidth / 2);
+
+                ctx.font = 'italic 10pt Calibri';
+
+                for (var i = 0; i < legendCnt; i++) {
+                    console.log(legend[i].length + " : " + legend[i]);
+
+                    var xTextWidth = ctx.measureText(legend[i]).width;
+                    var xPoint = (legendBoxAreaWidth * (i + 1)) - legendBoxAreaWidthHalf - legendTextWidth;
+
+                    ctx.fillStyle = RGBA[i];                    //Set the Box Color
+                    ctx.fillRect(xPoint, labelYPoint, xTextWidth + legendTextWidth, legendBoxHeight);
+                    ctx.textAlign = "start";
+                    ctx.fillStyle = "white";
+                    ctx.fillText(legend[i], xPoint + legendTextWidth / 2, labelYPoint + legendTopMargin - 2);
+                }
+
+
+            }
+
+            //Main process    
+            var fnStackedBar = function (CTX, elementCanvasId, json) {
+                //canvas size setting
+                var eleCanvas = document.getElementById(elementCanvasId);
+                var CanvasWidth = eleCanvas.width;
+                var CanvasHeight = eleCanvas.height;
+
+                var options = { GuideAlpha: 0.2, GuideFillYN: 'N' };
+
+                var data = json.data;
+                var LABEL = json.title.label;
+                var LEGEND = json.title.legend;
+
+                //#0. init Data Model : _MO
+                var _MO = {
+                    dtOrgDataSet: [],
+                    dtGroup: { maxValue: 0, colCnt: 0, rowCnt: 0 },
+                    dtBoxGroup: [],         //Group별 value의 합계 배열
+                    dtGroupPos: [],         //Group별 시작 Position, 가로/세로 크기 배열 attributes
+                    dtBoxPos: []            //개별 Box별 시작 Position, 가로/세로 크기 배열 attributes
+                }
+
+                _MO.dtOrgDataSet = data;
+
+                //#1. DataGroup
+                var dataSet = fnGetDataProp(data);
+                _MO.dtGroup = { maxValue: dataSet.maxValue, colCnt: dataSet.count, rowCnt: data[0].length };
+                _MO.dtBoxGroup = dataSet.valueGroup;
+
+                //#2. Global Config
+                fnSetConfig(CanvasWidth, CanvasHeight, { count: _MO.dtGroup.colCnt, maxValue: _MO.dtGroup.maxValue }, options);
+
+                //#3. To set stdBarWidth
+                var BarWidth = CFG.boxWidth;        //
+                CFG.ctx = CTX;
+
+
+                //Set Default Configuration
+                //fnSetConfig(CanvasWidth, CanvasHeight, dataSet);
+
+                //Canvas arae
+                var prop = { X: 0, Y: 0, W: CanvasWidth, H: CanvasHeight };
+                fnDrawBackground(CTX, prop, "rgba(244, 245, 186, 0.2)");
+
+                //real chart arae
+                //prop = { X: CFG.ctxStartX, Y: CFG.ctxStartY, W: CFG.ctxAvailableWidth, H: CFG.ctxAvailableHeight };
+                //fnDrawBackground(CTX, prop, "rgba(244, 245, 136, 0.64)");
+
+                //Make Axis
+                fnDrawAxis(CTX);
+
+                //Make Box List
+                //Group별 위치/크기 설정
+                _MO.dtGroupPos = fnMakeGroupPosition(_MO.dtGroup.maxValue, _MO.dtBoxGroup);
+
+                fnDrawLable(CTX, LABEL, _MO.dtGroupPos);
+
+                fnDrawLegend(CTX, LEGEND);
+
+                //Group별 개별 Box drawing
+                for (var i = 0; i < _MO.dtGroupPos.length; i++) {
+                    prop = _MO.dtGroupPos[i];
+                    prop["orgData"] = _MO.dtOrgDataSet[i];
+                    prop["orgGroupSum"] = _MO.dtBoxGroup[i];
+
+                    _MO.dtBoxPos[i] = fnDrawBox(CTX, prop);
+                }
+                //console.log(_MO.dtBoxPos);
+
+                //Draw Box guide line
+                fnCallDrawGuide(CTX, _MO.dtBoxPos);
+
+                return _MO.dtGroupPos;
+            }
+
             var canvas = document.getElementById("tutorial");
             var canvasPos = $(canvas).position();
             var canvasProp = { left: canvasPos.left, top: canvasPos.top };
@@ -375,13 +475,11 @@
             if (canvas.getContext) {
                 ctx = canvas.getContext('2d');
 
-                console.log(canvasPos.left + ":" + canvasPos.top);  //8,8
-
                 var jsonData = $('#mData').val();
                 var dataSet = JSON.parse(jsonData);
-                console.log(dataSet);
+                //console.log(dataSet);
 
-                boxAreaForEvent = fnStackedBar(ctx, "tutorial", dataSet.data);
+                boxAreaForEvent = fnStackedBar(ctx, "tutorial", dataSet);
 
             } else {
                 // canvas-unsupported code here
