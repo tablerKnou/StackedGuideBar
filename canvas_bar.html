@@ -1,0 +1,315 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+
+<HEAD>
+    <TITLE> New Document </TITLE>
+    <META NAME="Generator" CONTENT="EditPlus">
+    <META NAME="Author" CONTENT="">
+    <META NAME="Keywords" CONTENT="">
+    <META NAME="Description" CONTENT="">
+    <style type="text/css">
+        div {
+            border-color: coral;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+        crossorigin="anonymous"></script>
+</HEAD>
+
+<BODY>
+    <div style="display:block;">
+        Canvas
+        <br> A Height :
+        <input type="text" id="mCanvasWidth" value="1000" /> C Height :
+        <input type="text" id="mCanvasHeight" value="600" />&nbsp;&nbsp;
+        <input type="button" id="btnResize" value="Reload" />
+        <br />
+        <br/> Data Set :
+        <textarea cols="50" rows="10" id="mData">
+{"data":[
+    [10, 60, 10],
+    [90, 90, 40],
+    [70, 40, 70],
+    [40, 30, 50]
+]}
+        </textarea>
+    </div>
+
+    <div id="canvasArea">
+        <canvas id="tutorial" width="1000" height="600"></canvas>
+    </div>
+    <script type="text/javascript" language="javascript">
+        $.when($.ready).then(function () {
+            // Document is ready.
+
+            $("#btnResize").on('click', function () {
+                //alert('ok');
+                //var canvas = document.getElementById("tutorial");
+
+                var newCanvasWidth = $("#mCanvasWidth").val();
+                var newCanvasHeight = $("#mCanvasHeight").val();
+
+                $(canvas).attr({ 'width': newCanvasWidth, 'height': newCanvasHeight })
+
+                ctx = canvas.getContext('2d');
+                // 픽셀 정리
+                ctx.clearRect(0, 0, newCanvasWidth, newCanvasHeight);
+                // 컨텍스트 리셋
+                ctx.beginPath();
+
+                var jsonData = $('#mData').val();
+                var dataSet = JSON.parse(jsonData);
+
+                fnStackedBar(ctx, "tutorial", dataSet.data);
+
+            })
+
+            //# box rgb array  => 추후 자동 랜덤생성으로 변경(이쁜색 찾기 힘듬)
+            var rgb = ["rgba(200, 64, 43, 0.64)", "rgba(37, 195, 43, 0.64)", "rgba(84, 64, 201, 0.64)", "rgba(112, 245, 236, 0.64)", "rgba(141, 98, 131, 0.64)"
+                , "rgba(141, 98, 22, 0.64)", "rgba(180, 232, 22, 0.64)", "rgba(97, 103, 50, 0.64)", "rgba(255, 101, 161, 0.64)", "rgba(255, 62, 40, 0.64)"
+            ];
+
+            var CFG = {
+                ctxWholeWidth: 0,
+                ctxWholeHeight: 0,
+                ctxAvailableWidth: 0,
+                ctxAvailableHeight: 0,
+                ctxTopMargin: 0,
+                ctxBottomMargin: 0,
+                ctxLeftMargin: 0,
+                ctxStartX: 0,
+                ctxStartY: 0,
+                dataCount: 0,
+                dataMaxHeight: 0,
+                boxRightMargin: 0,
+                boxWidth: 0
+            };
+
+            //# set default config value (Box Total height, Box col count, Box margin)
+            var fnSetConfig = function (w, h, dataprop) {
+                var ctxTotalWidth = w;		//전체 Canvas 가로 크기
+                var ctxTotalHeight = h;		//전체 Canvas 세로 크기
+
+                var ctxTopMargin = 30;			    //상단 여백
+                var ctxBottomMargin = 40;			//하단 여백
+                var ctxLeftMargin = 50;		        //좌 여백
+                var ctxRightMargin = 60;		    //우 여백
+
+                var ctxAvailableWidth = ctxTotalWidth - ctxLeftMargin - ctxRightMargin;         //우 여백 차감
+                var ctxAvailableHeight = ctxTotalHeight - ctxTopMargin - ctxBottomMargin;         //상단 여백 차감
+                var ctxAvailableXPoint = 0 + ctxLeftMargin;                    //Point 시작 X점
+                var ctxAvailableYPoint = 0 + ctxTopMargin;                      //Point 시작 Y점
+
+                var dataWidthCount = dataprop.count;
+                var dataMaxHeight = dataprop.maxValue;
+
+                var boxRightMargin = 80;
+                var boxWidth = (Math.round(ctxAvailableWidth / dataWidthCount) - 1) - boxRightMargin;
+
+                CFG = {
+                    ctxWholeWidth: ctxTotalWidth,
+                    ctxWholeHeight: ctxTotalHeight,
+                    ctxAvailableWidth: ctxAvailableWidth,
+                    ctxAvailableHeight: ctxAvailableHeight,
+                    ctxTopMargin: ctxTopMargin,
+                    ctxBottomMargin: ctxBottomMargin,
+                    ctxLeftMargin: ctxLeftMargin,
+                    ctxRightMargin: ctxRightMargin,
+                    ctxStartX: ctxAvailableXPoint,
+                    ctxStartY: ctxAvailableYPoint,
+                    dataCount: dataWidthCount,
+                    dataMaxHeight: dataMaxHeight,
+                    boxRightMargin: boxRightMargin,
+                    boxWidth: boxWidth
+                };
+                console.log(CFG);
+            }
+
+            //# make axis
+            var fnDrawAxis = function (ctx) {
+                //X-Axis
+                ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+                ctx.beginPath();
+                ctx.moveTo(CFG.ctxLeftMargin, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
+                ctx.lineTo(CFG.ctxLeftMargin + CFG.ctxAvailableWidth, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
+                //ctx.closePath();
+                ctx.stroke();
+                //ctx.fill();
+
+                //Y-Axis
+                ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+                ctx.beginPath();
+                ctx.moveTo(CFG.ctxLeftMargin, CFG.ctxTopMargin);
+                ctx.lineTo(CFG.ctxLeftMargin, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
+                //ctx.closePath();
+                ctx.stroke();
+
+            }
+
+            //# make one box by Group
+            var fnDrawBox = function (ctx, prop) {
+                console.log('### prop');
+                console.log(prop);
+                var displayGroup = false;    //Group view display
+                var tmp = { X: prop.X, Y: prop.Y, W: prop.W, H: prop.H };
+                var tmpH = prop.H;
+
+                if (!displayGroup) {
+                    for (var i = 0; i < prop.orgData.length; i++) {
+                        tmpH = prop.H * prop.orgData[i] / prop.orgGroupSum; //box별 Height 계산
+                        tmp = { X: tmp.X, Y: tmp.Y, W: tmp.W, H: tmpH };
+
+                        ctx.fillStyle = rgb[i];
+                        ctx.fillRect(tmp.X, tmp.Y, tmp.W, tmp.H);
+
+                        tmp.Y += tmpH;
+
+                    }
+                } else {
+                    ctx.fillStyle = rgb[0];
+                    ctx.fillRect(tmp.X, tmp.Y, tmp.W, tmp.H);
+                }
+
+            }
+
+            //# make axis X,Y
+            var fnMakeBox = function (data) {
+
+                var maxCanvasHeight = CFG.ctxAvailableHeight;   //여백을 제외한 Canvas 사용 총 높이
+                //var maxDataY = dataSet.slice(0).sort().reverse()[0];
+                var maxDataY = data.maxValue;
+                var dataGroup = data.valueGroup;
+
+                var BoxesAxis = [];
+                var stdLeftMargin = 20;
+
+                var boxWidth = CFG.boxWidth;
+                var tmpXAxis = CFG.ctxStartX + stdLeftMargin;
+
+                for (var i = 0; i < dataGroup.length; i++) {
+                    var arr = {
+                        idx: i,
+                        X: tmpXAxis,
+                        Y: (maxDataY - dataGroup[i]) / maxDataY * maxCanvasHeight + CFG.ctxStartY,
+                        W: boxWidth,
+                        H: dataGroup[i] / maxDataY * maxCanvasHeight
+                    };           //X축 계산
+                    BoxesAxis.push(arr);
+                    tmpXAxis += CFG.boxWidth + CFG.boxRightMargin;
+                }
+
+                //console.log(BoxesAxis);
+                return BoxesAxis;
+
+            }
+
+            var fnMakeStackBox = function () {
+
+            }
+
+            //Get max data value, Get data count
+            var fnGetDataProp = function (data) {
+                //console.log("### data");
+                //console.log(data);
+                //X축의 Count
+                var nDataCnt = data.length;
+                //X축별 Data sum array
+                var arrValues = [];
+                var sumValue = 0;
+                for (var i = 0; i < nDataCnt; i++) {
+                    sumValue = data[i].reduce((x, y) => x + y);     //Group value sum
+                    arrValues.push(parseInt(sumValue));
+                }
+                var maxDataValue = arrValues.slice(0).sort(function (a, b) { return b - a })[0];        //ValueGroup Max value
+
+                var dataProp = { maxValue: maxDataValue, count: nDataCnt, valueGroup: arrValues };
+
+                //console.log("##### prop");
+                //console.log(dataProp);
+                return dataProp;
+            }
+
+            //Main process    
+            var fnStackedBar = function (CTX, elementCanvasId, data) {
+                //canvas size setting
+                var eleCanvas = document.getElementById(elementCanvasId);
+                var CanvasWidth = eleCanvas.width;
+                var CanvasHeight = eleCanvas.height;
+
+                var dataSet = fnGetDataProp(data);
+
+                //Set Default Configuration
+                fnSetConfig(CanvasWidth, CanvasHeight, dataSet);
+
+                var BarWidth = CFG.boxWidth;        //
+
+                //Canvas area painting
+                var prop = { X: 0, Y: 0, W: CanvasWidth, H: CanvasHeight };
+
+                //Canvas arae
+                CTX.fillStyle = "rgba(244, 245, 236, 0.64)";
+                CTX.fillRect(prop.X, prop.Y, prop.W, prop.H);
+
+                //real chart arae
+                //CTX.fillStyle = "rgba(244, 245, 136, 0.64)";
+                //CTX.fillRect (CFG.ctxStartX, CFG.ctxStartY, CFG.ctxAvailableWidth, CFG.ctxAvailableHeight);
+
+                //Make Axis
+                fnDrawAxis(CTX);
+
+                //Make Box List
+                var arrBoxes = fnMakeBox(dataSet);
+
+                for (var i = 0; i < arrBoxes.length; i++) {
+                    prop = arrBoxes[i];
+                    prop["orgData"] = data[i];
+                    prop["orgGroupSum"] = dataSet.valueGroup[i];
+
+                    fnDrawBox(CTX, prop);
+                }
+                return arrBoxes;
+            }
+
+
+            var canvas = document.getElementById("tutorial");
+            var canvasPos = $(canvas).position();
+            var canvasProp = { left: canvasPos.left, top: canvasPos.top };
+            var ctx = null;
+            var boxAreaForEvent = null;
+
+
+            if (canvas.getContext) {
+                ctx = canvas.getContext('2d');
+
+                console.log(canvasPos.left + ":" + canvasPos.top);  //8,8
+
+                var jsonData = $('#mData').val();
+                var dataSet = JSON.parse(jsonData);
+                console.log(dataSet);
+
+                boxAreaForEvent = fnStackedBar(ctx, "tutorial", dataSet.data);
+
+            } else {
+                // canvas-unsupported code here
+            }
+
+            $(canvas).on('mousemove', function (e) {
+
+                //console.log(e.pageX + "," + e.pageY);
+            }).on('mouseout', function () {
+                //console.log("out");
+            });
+
+            //fnStackedBar(Canvas);
+
+
+
+
+
+
+
+        });
+    </script>
+</BODY>
+
+</HTML>
