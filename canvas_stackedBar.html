@@ -82,7 +82,9 @@
                 dataCount: 0,
                 dataMaxHeight: 0,
                 boxRightMargin: 0,
-                boxWidth: 0
+                boxWidth: 0,
+                guideColor: 0,
+                ctx: null
             };
 
             //# set default config value (Box Total height, Box col count, Box margin)
@@ -103,8 +105,10 @@
                 var dataWidthCount = dataprop.count;
                 var dataMaxHeight = dataprop.maxValue;
 
-                var boxRightMargin = 80;
-                var boxWidth = (Math.round(ctxAvailableWidth / dataWidthCount) - 1) - boxRightMargin;
+                //box margin 동적 계산
+                var calcBoxWidth = (Math.round(ctxAvailableWidth / dataWidthCount));
+                var boxRightMargin = Math.floor(calcBoxWidth / 3);
+                var boxWidth = calcBoxWidth - boxRightMargin;
 
                 CFG = {
                     ctxWholeWidth: ctxTotalWidth,
@@ -120,7 +124,8 @@
                     dataCount: dataWidthCount,
                     dataMaxHeight: dataMaxHeight,
                     boxRightMargin: boxRightMargin,
-                    boxWidth: boxWidth
+                    boxWidth: boxWidth,
+                    guideColor: 0.25
                 };
                 console.log(CFG);
             }
@@ -153,6 +158,12 @@
                 ctx.fillRect(prop.X, prop.Y, prop.W, prop.H);
             }
 
+            //RGBA be less color
+            var fnMakeAlphaColor = function (rgba) {
+                var strRgb = rgba.substring(0, rgba.lastIndexOf(","));
+                return strRgb + ", " + CFG.guideColor + ")";
+            }
+
             //# make one box by Group
             var fnDrawBox = function (ctx, prop) {
 
@@ -165,12 +176,15 @@
                 if (!displayGroup) {
                     for (var i = 0; i < prop.orgData.length; i++) {
                         tmpH = prop.H * prop.orgData[i] / prop.orgGroupSum; //box별 Height 계산
-                        tmp = { X: tmp.X, Y: tmp.Y, W: tmp.W, H: tmpH };
+                        tmp = { X: tmp.X, Y: tmp.Y, W: tmp.W, H: tmpH, point: {} };
 
-                        ctx.fillStyle = RGBA[i];
+                        ctx.fillStyle = RGBA[i];                    //Set the Box Color
                         ctx.fillRect(tmp.X, tmp.Y, tmp.W, tmp.H);
 
-                        tmp["color"] = RGBA[i];
+                        tmp["color"] = fnMakeAlphaColor(RGBA[i]);   //Set the Box Guide Line Color
+
+                        tmp.point = fnMakeBoxPoint(tmp);
+
                         arrPos.push(tmp);
 
                         tmp.Y += tmpH;
@@ -180,7 +194,10 @@
                     ctx.fillStyle = RGBA[0];
                     ctx.fillRect(tmp.X, tmp.Y, tmp.W, tmp.H);
 
-                    tmp["color"] = RGBA[0];
+                    tmp["color"] = fnMakeAlphaColor(RGBA[0]);
+
+                    tmp.point = fnMakeBoxPoint(tmp);
+
                     arrPos.push(tmp);
                 }
 
@@ -215,10 +232,6 @@
 
                 console.log(BoxesAxis);
                 return BoxesAxis;
-
-            }
-
-            var fnMakeStackBox = function () {
 
             }
 
@@ -272,6 +285,7 @@
 
                 //#3. To set stdBarWidth
                 var BarWidth = CFG.boxWidth;        //
+                CFG.ctx = CTX;
 
 
                 //Set Default Configuration
@@ -300,15 +314,55 @@
 
                     _MO.dtBoxPos[i] = fnDrawBox(CTX, prop);
                 }
-                console.log(_MO.dtBoxPos);
+                //console.log(_MO.dtBoxPos);
 
-                //개별 Box Guide line 표시 
+                //Draw Box guide line
+                fnCallDrawGuide(CTX, _MO.dtBoxPos);
 
                 return _MO.dtGroupPos;
             }
 
-            var fnMakeBoxGuideLine = function () {
+            var fnCallDrawGuide = function (ctx, arrBoxAttr) {
+                var GuideXAxisCnt = arrBoxAttr.length;
+                var GuideYAxisCnt = 0;
 
+                var arrTemp = arrBoxAttr[0];
+                GuideYAxisCnt = arrTemp.length;
+
+                for (var i = 0; i < GuideXAxisCnt - 1; i++) {
+                    for (var j = 0; j < GuideYAxisCnt; j++) {
+                        fnDrawGuideLine(ctx, arrBoxAttr[i][j].point, arrBoxAttr[i + 1][j].point, arrBoxAttr[i][j].color);
+                    }
+                }
+            }
+
+            var fnDrawGuideLine = function (ctx, box1, box2, rgba) {
+                ctx.fillStyle = rgba;
+                ctx.beginPath();
+                ctx.moveTo(box1.RTTP.x, box1.RTTP.y);
+                ctx.lineTo(box2.LFTP.x, box2.LFTP.y);
+                ctx.lineTo(box2.LFBT.x, box2.LFBT.y);
+                ctx.lineTo(box1.RTBT.x, box1.RTBT.y);
+                ctx.closePath();
+                //ctx.stroke();
+                ctx.fill();
+            }
+
+            //Box 4Point 설정
+            var fnMakeBoxPoint = function (boxProp) {
+                var pos = { x: boxProp.X, y: boxProp.Y };
+                var point = { LFTP: pos, RTTP: pos, RTBT: pos, LFBT: pos };
+
+                //LFTP : LeftTop
+                point.LFTP = { x: boxProp.X, y: boxProp.Y };
+                //RTTP : RightTop
+                point.RTTP = { x: boxProp.X + boxProp.W, y: boxProp.Y };
+                //RTBT : RightBottom
+                point.RTBT = { x: boxProp.X + boxProp.W, y: boxProp.Y + boxProp.H };
+                //LFBT  : LeftBottom
+                point.LFBT = { x: boxProp.X, y: boxProp.Y + boxProp.H };
+
+                return point;
             }
 
             var canvas = document.getElementById("tutorial");
