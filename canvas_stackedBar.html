@@ -27,11 +27,11 @@
         <br/> Data Set :
         <textarea cols="50" rows="10" id="mData">
 {   
-    "title":{
+    "title":[{
         "title":"1분기 지출",
         "label":["1월","2월","3월","4월"],
         "legend":["자재비","인건비","가공비"]
-    },
+    }],
     "data":[
         [10, 60, 10],
         [90, 90, 40],
@@ -92,6 +92,7 @@
                 boxWidth: 0,
                 guideColorAlpha: 0,
                 guideFillYN: 'N',
+                commentPos: { x: 0, y: 0 },
                 ctx: null
             };
 
@@ -135,6 +136,7 @@
                     boxWidth: boxWidth,
                     guideColorAlpha: OPT.GuideAlpha = typeof OPT.GuideAlpha !== 'undefined' ? OPT.GuideAlpha : 0.2,
                     guideFillYN: OPT.GuideFillYN = typeof OPT.GuideFillYN !== 'undefined' ? OPT.GuideFillYN : 'N',
+                    commentPos: { x: 0, y: 0 }
                 };
                 //console.log(CFG);
             }
@@ -361,6 +363,29 @@
 
             }
 
+            //Draw Comment box
+            var fnDrawComment = function (ctx) {
+                var canvasWidth = CFG.ctxWholeWidth;
+                var x = 60;
+                var y = 10;
+                var r = 20;
+                var w = 50;
+                var h = 40;
+                var posX = canvasWidth - x;
+
+                ctx.beginPath();
+                //ctx.arc(posX, y, r, 0, 2 * Math.PI);
+                ctx.fillStyle = "rgba(115, 104, 89, 0.78)";
+                ctx.fillRect(posX, y, w, h);
+                //ctx.fill();
+
+                ctx.font = '28pt Georgia';
+                ctx.fillStyle = "black";
+
+                //ctx.fillText("C", posX, y);
+
+            }
+
             var fnDrawLegend = function (ctx, legend) {
                 var legendTopMargin = 24;
                 var legendTextWidth = 30;
@@ -375,8 +400,6 @@
                 ctx.font = '10pt Calibri';
 
                 for (var i = 0; i < legendCnt; i++) {
-                    console.log(legend[i].length + " : " + legend[i]);
-
                     var xTextWidth = ctx.measureText(legend[i]).width;
                     var xPoint = (legendBoxAreaWidth * (i + 1)) - legendBoxAreaWidthHalf - legendTextWidth;
 
@@ -386,7 +409,6 @@
                     ctx.fillStyle = "white";
                     ctx.fillText(legend[i], xPoint + legendTextWidth / 2, labelYPoint + legendTopMargin - 2);
                 }
-
 
             }
 
@@ -400,8 +422,8 @@
                 var options = { GuideAlpha: 0.2, GuideFillYN: 'N' };
 
                 var data = json.data;
-                var LABEL = json.title.label;
-                var LEGEND = json.title.legend;
+                var LABEL = json.title[0].label;
+                var LEGEND = json.title[0].legend;
 
                 //#0. init Data Model : _MO
                 var _MO = {
@@ -461,6 +483,9 @@
 
                 //Draw Box guide line
                 fnCallDrawGuide(CTX, _MO.dtBoxPos);
+
+                //Comment Box
+                fnDrawComment(CTX);
 
                 return _MO.dtGroupPos;
             }
