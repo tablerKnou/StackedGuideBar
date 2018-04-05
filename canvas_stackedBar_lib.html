@@ -426,31 +426,31 @@
             //Main process    
             var fnStackedBar = function (CTX, elementCanvasId, json) {
                 //canvas size setting
-                var eleCanvas = document.getElementById(elementCanvasId);
-                var CanvasWidth = eleCanvas.width;
-                var CanvasHeight = eleCanvas.height;
+                // var eleCanvas = document.getElementById(elementCanvasId);
+                // var CanvasWidth = eleCanvas.width;
+                // var CanvasHeight = eleCanvas.height;
 
                 var options = { GuideAlpha: 0.2, GuideFillYN: 'N' };
 
-                var data = json.data;
-                var LABEL = json.title[0].label;
-                var LEGEND = json.title[0].legend;
+                // var data = json.data;
+                // var LABEL = json.title[0].label;
+                // var LEGEND = json.title[0].legend;
 
                 //#0. init Data Model : _MO
-                var _MO = {
-                    dtOrgDataSet: [],
-                    dtGroup: { maxValue: 0, colCnt: 0, rowCnt: 0 },
-                    dtBoxGroup: [],         //Group별 value의 합계 배열
-                    dtGroupPos: [],         //Group별 시작 Position, 가로/세로 크기 배열 attributes
-                    dtBoxPos: []            //개별 Box별 시작 Position, 가로/세로 크기 배열 attributes
-                }
+                // var _MO = {
+                //     dtOrgDataSet: [],
+                //     dtGroup: { maxValue: 0, colCnt: 0, rowCnt: 0 },
+                //     dtBoxGroup: [],         //Group별 value의 합계 배열
+                //     dtGroupPos: [],         //Group별 시작 Position, 가로/세로 크기 배열 attributes
+                //     dtBoxPos: []            //개별 Box별 시작 Position, 가로/세로 크기 배열 attributes
+                // }
 
-                _MO.dtOrgDataSet = data;
+                // _MO.dtOrgDataSet = data;
 
                 //#1. DataGroup
-                var dataSet = fnGetDataProp(data);
-                _MO.dtGroup = { maxValue: dataSet.maxValue, colCnt: dataSet.count, rowCnt: data[0].length };
-                _MO.dtBoxGroup = dataSet.valueGroup;
+                // var dataSet = fnGetDataProp(data);
+                // _MO.dtGroup = { maxValue: dataSet.maxValue, colCnt: dataSet.count, rowCnt: data[0].length };
+                // _MO.dtBoxGroup = dataSet.valueGroup;
 
                 //#2. Global Config
                 fnSetConfig(CanvasWidth, CanvasHeight, { count: _MO.dtGroup.colCnt, maxValue: _MO.dtGroup.maxValue }, options);

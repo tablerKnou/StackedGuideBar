@@ -1,0 +1,83 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+
+<HEAD>
+    <TITLE> New Document </TITLE>
+    <META NAME="Generator" CONTENT="EditPlus">
+    <META NAME="Author" CONTENT="">
+    <META NAME="Keywords" CONTENT="">
+    <META NAME="Description" CONTENT="">
+    <style type="text/css">
+        div {
+            border-color: coral;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
+        crossorigin="anonymous"></script>
+</HEAD>
+
+<BODY>
+    <div style="display:block;">
+        Canvas
+        <br> A Width :
+        <input type="text" id="mCanvasWidth" value="1000" /> C Height :
+        <input type="text" id="mCanvasHeight" value="600" />&nbsp;&nbsp;
+        <input type="button" id="btnResize" value="Reload" />
+        <br />
+        <br/> Data Set :
+        <textarea cols="50" rows="10" id="mData" style="display:none;">
+            {   
+                "title":[{
+                    "title":"1분기 지출",
+                    "label":["1월","2월","3월","4월"],
+                    "legend":["자재비","인건비","가공비"]
+                }],
+                "data":[
+                    [10, 60, 10],
+                    [90, 90, 40],
+                    [70, 40, 70],
+                    [40, 30, 50]
+                ]
+            }
+        </textarea>
+    </div>
+    <div id="canvasArea">
+        <canvas id="tutorial" width="1000" height="600"></canvas>
+    </div>
+    <script type="text/javascript" language="javascript" src="stackedBarGuide.js"></script>
+    <script type="text/javascript" language="javascript">
+        $.when($.ready).then(function () {
+            // Document is ready.
+            var DATA = $('#mData').val();
+            /*
+            //Sampe JSON Data Schema
+            var DATA = '                                        \
+                {                                               \
+                    "title":[{                                  \
+                        "title":"1분기 지출",                    \
+                        "label":["1월","3월","3월","4월"],       \
+                        "legend":["자재비","인건비","가공비"]     \
+                    }],                                         \
+                    "data":[                                    \
+                        [10, 60, 10],                           \
+                        [90, 90, 40],                           \
+                        [70, 40, 70],                           \
+                        [40, 30, 50]                            \
+                    ]                                           \
+                }                                               \
+            ';
+            */
+            var exam = new KOSITV.StackedBar('tutorial');
+
+            var options = { guideAlpha: 0.2, guideFillYN: "N", useComment: "Y", useGuideLine: "Y", onlyGroupBox: "N" };
+            exam.init(DATA, options);
+
+            //exam.init(DATA);
+
+
+
+        });
+    </script>
+</BODY>
+
+</HTML>
