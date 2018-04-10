@@ -18,7 +18,7 @@
 
 <BODY>
     <div style="display:block;">
-        Canvas ver 0.9
+        Canvas
         <br> A Width :
         <input type="text" id="mCanvasWidth" value="1000" /> C Height :
         <input type="text" id="mCanvasHeight" value="600" />&nbsp;&nbsp;
@@ -34,26 +34,14 @@
         <canvas id="tutorial" width="1000" height="600"></canvas>
         <canvas id="tutorial2" width="1000" height="600"></canvas>
     </div>
-    <script type="text/javascript" language="javascript" src="stackedBarGuide.js"></script>
+    <script type="text/javascript" language="javascript" src="stackedBar.js"></script>
     <script type="text/javascript" language="javascript">
         $.when($.ready).then(function () {
             // Document is ready.
-            $("#btnResize").on('click', function () {
-
-                //var canvas = document.getElementById("tutorial");
-                var newCanvasWidth = $("#mCanvasWidth").val();
-                var newCanvasHeight = $("#mCanvasHeight").val();
-
-                exam.reload(newCanvasWidth, newCanvasHeight);
-                exam.init(DATA, options);
-
-            });
-
-            //var DATA = $('#mData').val();
-
+            var DATA = $('#mData').val();
+            /*
             //Sampe JSON Data Schema
-            var DATA =
-                '                                        \
+            var DATA = '                                        \
                 {                                               \
                     "title":[{                                  \
                         "title":"1분기 지출",                    \
@@ -68,33 +56,17 @@
                     ]                                           \
                 }                                               \
             ';
-
-
-            /*
-                Chart Library : KOSITV.StackedBar
-                - Param : canvas element id
             */
             var exam = new KOSITV.StackedBar('tutorial');
 
-            /*
-             var options = {
-                 guideAlpha: 0.2,                //Box Guide Line Alpha value : 0.0 ~1.0
-                 guideFillYN: "N",               //Box Guide Line을 라인만 표시 or 색상도 표시 여부 : Y(색상표시), N(선만)
-                 useComment: "Y",                //[개발중]User Comment 표시 기능 : Y(Comment 표시), N(표시하지 않음) 
-                 useGuideLine: "Y",              //Box Guide Line 표시 여부 : Y(사용), N(표시하지 않음)
-                 onlyGroupBox: "N"               //Box를 x축별 누적으로 표시 : Y(누적표시), N(개별 표시)
-             };
-             */
+            //var options = { guideAlpha: 0.2, guideFillYN: "N", useComment: "Y", useGuideLine: "Y", onlyGroupBox: "N" };
             var options = {
                 useGuideLine: "Y",
-                guideFillYN: "Y",
                 useComment: "Y"
             };
             exam.init(DATA, options);
 
-            //Second Chart
-            var exam2 = new KOSITV.StackedBar('tutorial2');
-            exam2.init(DATA); //Options이 없는 기본값 Chart
+            //exam.init(DATA);
 
 
 

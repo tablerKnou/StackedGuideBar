@@ -37,6 +37,8 @@ KOSITV.StackedBar = function(pCanvasId) {
     ctx: null
   };
 
+  var SEQ = [];
+
   var fnSetConfig = function(w, h, dataprop, OPT) {
     var ctxTotalWidth = w; //전체 Canvas 가로 크기
     var ctxTotalHeight = h; //전체 Canvas 세로 크기
@@ -85,120 +87,10 @@ KOSITV.StackedBar = function(pCanvasId) {
     //console.log(CFG);
   };
 
-  //# make axis
-  var fnDrawAxis = function(ctx) {
-    //X-Axis
-    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-    ctx.beginPath();
-    ctx.moveTo(CFG.ctxLeftMargin, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
-    ctx.lineTo(
-      CFG.ctxLeftMargin + CFG.ctxAvailableWidth,
-      CFG.ctxTopMargin + CFG.ctxAvailableHeight
-    );
-    ctx.lineWidth = 0.6;
-    //ctx.closePath();
-    ctx.stroke();
-    //ctx.fill();
-
-    //Y-Axis
-    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-    ctx.beginPath();
-    ctx.moveTo(CFG.ctxLeftMargin, CFG.ctxTopMargin);
-    ctx.lineTo(CFG.ctxLeftMargin, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
-    ctx.lineWidth = 0.6;
-    //ctx.closePath();
-    ctx.stroke();
-  };
-
   //Draw background
   var fnDrawBackground = function(ctx, prop, rgb) {
     ctx.fillStyle = rgb;
     ctx.fillRect(prop.X, prop.Y, prop.W, prop.H);
-  };
-
-  //RGBA be less color
-  var fnMakeAlphaColor = function(rgba) {
-    var strRgb = rgba.substring(0, rgba.lastIndexOf(","));
-    return strRgb + ", " + CFG.guideColorAlpha + ")";
-  };
-
-  var fnConvertRgbToHex = function(rgba) {
-    CFG.ctx.fillStyle = "rgba(0, 0, 0, 0)";
-    // We're reusing the canvas, so fill it with something predictable
-    CFG.ctx.clearRect(0, 0, 1, 1);
-    CFG.ctx.fillStyle = rgba;
-    CFG.ctx.fillRect(0, 0, 1, 1);
-
-    var a = CFG.ctx.getImageData(0, 0, 1, 1).data;
-    // Sigh, you can't map() typed arrays
-    var hex = [0, 1, 2]
-      .map(function(i) {
-        return fnByteToHex(a[i]);
-      })
-      .join("");
-    return "#" + hex;
-  };
-
-  var fnByteToHex = function(byte) {
-    return ("0" + byte.toString(16)).slice(-2);
-  };
-
-  //Draw Guide line
-  var fnDrawGuideLine = function(ctx, box1, box2, rgba) {
-    ctx.fillStyle = rgba;
-    ctx.beginPath();
-    ctx.moveTo(box1.RTTP.x, box1.RTTP.y);
-    ctx.lineTo(box2.LFTP.x, box2.LFTP.y);
-    ctx.lineTo(box2.LFBT.x, box2.LFBT.y);
-    ctx.lineTo(box1.RTBT.x, box1.RTBT.y);
-    //ctx.lineStyle = fnConvertRgbToHex(rgba);
-    if (CFG.guideFillYN == "Y") {
-      ctx.closePath();
-      ctx.fill();
-    } else {
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = fnConvertRgbToHex(rgba);
-      ctx.stroke();
-    }
-  };
-
-  //# make one box by Group
-  var fnDrawBox = function(ctx, prop) {
-    var displayGroup = CFG.onlyGroupBox; //Group view display
-
-    var tmp = { X: prop.X, Y: prop.Y, W: prop.W, H: prop.H };
-    var tmpH = prop.H;
-
-    var arrPos = [];
-
-    if (displayGroup == "N") {
-      for (var i = 0; i < prop.orgData.length; i++) {
-        tmpH = prop.H * prop.orgData[i] / prop.orgGroupSum; //box별 Height 계산
-        tmp = { X: tmp.X, Y: tmp.Y, W: tmp.W, H: tmpH, point: {} };
-
-        ctx.fillStyle = RGBA[i]; //Set the Box Color
-        ctx.fillRect(tmp.X, tmp.Y, tmp.W, tmp.H);
-
-        tmp["color"] = fnMakeAlphaColor(RGBA[i]); //Set the Box Guide Line Color
-
-        tmp.point = fnMakeBoxPoint(tmp);
-
-        arrPos.push(tmp);
-
-        tmp.Y += tmpH;
-      }
-    } else {
-      ctx.fillStyle = RGBA[0];
-      ctx.fillRect(tmp.X, tmp.Y, tmp.W, tmp.H);
-
-      tmp["color"] = fnMakeAlphaColor(RGBA[0]);
-
-      tmp.point = fnMakeBoxPoint(tmp);
-
-      arrPos.push(tmp);
-    }
-
-    return arrPos;
   };
 
   //# make axis X,Y
@@ -258,151 +150,37 @@ KOSITV.StackedBar = function(pCanvasId) {
     return dataProp;
   };
 
-  //Call draw function for guide line
-  var fnCallDrawGuide = function(ctx, arrBoxAttr) {
-    var GuideXAxisCnt = arrBoxAttr.length;
-    var GuideYAxisCnt = 0;
-
-    var arrTemp = arrBoxAttr[0];
-    GuideYAxisCnt = arrTemp.length;
-
-    for (var i = 0; i < GuideXAxisCnt - 1; i++) {
-      for (var j = 0; j < GuideYAxisCnt; j++) {
-        fnDrawGuideLine(
-          ctx,
-          arrBoxAttr[i][j].point,
-          arrBoxAttr[i + 1][j].point,
-          arrBoxAttr[i][j].color
-        );
-      }
-    }
-  };
-
-  //Box 4Point 설정
-  var fnMakeBoxPoint = function(boxProp) {
-    var pos = { x: boxProp.X, y: boxProp.Y };
-    var point = { LFTP: pos, RTTP: pos, RTBT: pos, LFBT: pos };
-
-    //LFTP : LeftTop
-    point.LFTP = { x: boxProp.X, y: boxProp.Y };
-    //RTTP : RightTop
-    point.RTTP = { x: boxProp.X + boxProp.W, y: boxProp.Y };
-    //RTBT : RightBottom
-    point.RTBT = { x: boxProp.X + boxProp.W, y: boxProp.Y + boxProp.H };
-    //LFBT  : LeftBottom
-    point.LFBT = { x: boxProp.X, y: boxProp.Y + boxProp.H };
-
-    return point;
-  };
-
-  //Drawing Box by Group
-  var fnDrawGroupBox = function(CTX, _mo) {
-    var prop = { X: 0, Y: 0, W: 0, H: 0 };
-
-    for (var i = 0; i < _mo.dtGroupPos.length; i++) {
-      prop = _mo.dtGroupPos[i];
-      prop["orgData"] = _mo.dtOrgDataSet[i];
-      prop["orgGroupSum"] = _mo.dtBoxGroup[i];
-
-      _mo.dtBoxPos[i] = fnDrawBox(CTX, prop);
-    }
-  };
-
-  var fnDrawLable = function(ctx, label, groupPos) {
-    var labelYPoint = CFG.ctxTopMargin + CFG.ctxAvailableHeight;
-    var labelXBasePoint = CFG.ctxLeftMargin;
-    var axisBaseLineHeight = 5;
-    var axisBaseLabelMarginX = 10;
-    var axisBaseLabelMarginY = 20;
-
-    for (var i = 0; i < groupPos.length; i++) {
-      var axis = groupPos[i];
-      var x = axis.X + Math.round(axis.W / 2); //Group Box Start point + Box Width/2
-
-      ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-      ctx.beginPath();
-      ctx.moveTo(x, labelYPoint - axisBaseLineHeight);
-      ctx.lineTo(x, labelYPoint + axisBaseLineHeight);
-      ctx.lineWidth = 1;
-      //ctx.closePath();
-      ctx.stroke();
-
-      ctx.font = "italic 10pt Calibri";
-      ctx.fillText(
-        label[i],
-        x - axisBaseLabelMarginX,
-        labelYPoint + axisBaseLabelMarginY
-      );
-    }
-  };
-
-  //Draw Comment box
-  var fnDrawComment = function(ctx) {
-    var canvasWidth = CFG.ctxWholeWidth;
-    var x = 60;
-    var y = 10;
-    var r = 20;
-    var w = 50;
-    var h = 40;
-    var posX = canvasWidth - w - 10;
-
+  //# make axis
+  var fnDrawAxis = function(ctx) {
+    //X-Axis
+    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
     ctx.beginPath();
-    //ctx.arc(posX, y, r, 0, 2 * Math.PI);
-    ctx.fillStyle = "rgba(115, 104, 89, 0.78)";
-    ctx.fillRect(posX, y, w, h);
+    ctx.moveTo(CFG.ctxLeftMargin, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
+    ctx.lineTo(
+      CFG.ctxLeftMargin + CFG.ctxAvailableWidth,
+      CFG.ctxTopMargin + CFG.ctxAvailableHeight
+    );
+    ctx.lineWidth = 0.6;
+    //ctx.closePath();
+    ctx.stroke();
     //ctx.fill();
 
-    ctx.font = "28pt Georgia";
-    ctx.fillStyle = "black";
-    ctx.textAlign = "Left";
-    ctx.fillText("C", posX + 10, y + 28 + 5);
-
-    fnMakeEventObject({ type: "C", x: posX, y: y, w: w, h: h }); //Event handler용 객체 저장
+    //Y-Axis
+    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+    ctx.beginPath();
+    ctx.moveTo(CFG.ctxLeftMargin, CFG.ctxTopMargin);
+    ctx.lineTo(CFG.ctxLeftMargin, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
+    ctx.lineWidth = 0.6;
+    //ctx.closePath();
+    ctx.stroke();
   };
 
-  var fnDrawLegend = function(ctx, legend) {
-    var legendTopMargin = 24;
-    var legendTextWidth = 30;
-    var legendTextLeftMargin = 15;
-    var legendBoxHeight = 30;
-    var legendCnt = legend.length;
-    var labelYPoint =
-      CFG.ctxTopMargin + CFG.ctxAvailableHeight + legendTopMargin;
-    var labelXBasePoint = CFG.ctxLeftMargin;
-    var legendBoxAreaWidth = Math.round(CFG.ctxAvailableWidth / legendCnt);
-    var legendBoxAreaWidthHalf = Math.floor(legendBoxAreaWidth / 2);
-
-    ctx.font = "10pt Calibri";
-
-    for (var i = 0; i < legendCnt; i++) {
-      var xTextWidth = ctx.measureText(legend[i]).width;
-      var xPoint =
-        legendBoxAreaWidth * (i + 1) - legendBoxAreaWidthHalf - legendTextWidth;
-
-      ctx.fillStyle = RGBA[i]; //Set the Box Color
-      ctx.fillRect(
-        xPoint,
-        labelYPoint,
-        xTextWidth + legendTextWidth,
-        legendBoxHeight
-      );
-      ctx.textAlign = "start";
-      ctx.fillStyle = "white";
-      ctx.fillText(
-        legend[i],
-        xPoint + legendTextWidth / 2,
-        labelYPoint + legendTopMargin - 2
-      );
+  var cmmManageSeqId = function() {
+    if (SEQ.length == 0) {
+      return 0;
+    } else {
+      return SEQ.length;
     }
-  };
-
-  var fnMakeEventObject = function(evtObj) {
-    //eventObject: [{ type: 'C', x: 0, y: 0, w: 0, h: 0 }]
-    CFG.eventObject.push(evtObj);
-  };
-
-  var fnEventHandler = function(eX, eY) {
-    //console.log(eX + " : " + eY);
   };
 
   //객체의 Property 존재여부 체크
@@ -509,6 +287,18 @@ KOSITV.StackedBar = function(pCanvasId) {
       }
       this._opt = options;
     },
+    _event: function() {
+      $(this._canvas)
+        .on("mousemove", function(e) {
+          //console.log(e.pageX, e.pageY);
+          //ctx.fnEventHandler(e.pageX, e.pageY);
+          //console.log(e.pageX + "," + e.pageY);
+        })
+        .on("mouseout", function() {
+          //console.log("out");
+        })
+        .on("click", function() {});
+    },
     init: function(pData, pOption) {
       //# 1.init Canvas,Context
       if (!this._initCtx()) {
@@ -539,6 +329,16 @@ KOSITV.StackedBar = function(pCanvasId) {
         W: this._canvasCfg.width,
         H: this._canvasCfg.height
       };
+
+      var boxProp = {
+        id: cmmManageSeqId(),
+        X: 0,
+        Y: 0,
+        W: this._canvasCfg.width,
+        H: this._canvasCfg.height,
+        reb: "rgba(244, 245, 186, 0.2)"
+      };
+      SEQ.push(boxProp);
       fnDrawBackground(this._ctx, prop, "rgba(244, 245, 186, 0.2)");
 
       //real chart arae
@@ -560,21 +360,25 @@ KOSITV.StackedBar = function(pCanvasId) {
         this._MO.dtBoxGroup
       );
 
+      console.log(this._MO.dtGroupPos);
+
       // Draw Label
-      fnDrawLable(this._ctx, this._label, this._MO.dtGroupPos);
+      //fnDrawLable(this._ctx, this._label, this._MO.dtGroupPos);
 
       // Draw Legend
-      fnDrawLegend(this._ctx, this._legend);
+      //fnDrawLegend(this._ctx, this._legend);
 
       // Draw Group box
-      fnDrawGroupBox(this._ctx, this._MO);
+      //fnDrawGroupBox(this._ctx, this._MO);
 
       //Draw Box guide line
-      if (this._opt.UseGuideLine == "Y")
-        fnCallDrawGuide(this._ctx, this._MO.dtBoxPos);
+      //if (this._opt.UseGuideLine == "Y")
+      //fnCallDrawGuide(this._ctx, this._MO.dtBoxPos);
 
       //Comment Box
-      if (this._opt.UseComment == "Y") fnDrawComment(this._ctx);
+      //if (this._opt.UseComment == "Y") fnDrawComment(this._ctx);
+
+      //this._event();
     }
   };
 

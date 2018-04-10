@@ -19,16 +19,6 @@
 <BODY>
     <div style="display:block;">
         Canvas ver 0.9
-        <br> A Width :
-        <input type="text" id="mCanvasWidth" value="1000" /> C Height :
-        <input type="text" id="mCanvasHeight" value="600" />&nbsp;&nbsp;
-        <input type="button" id="btnResize" value="Reload" />
-        <br />
-        <br/> Data Set :
-        <textarea cols="50" rows="10" id="mData" style="display:none;">
-            { "title":[{ "title":"1분기 지출", "label":["1월","2월","3월","4월"], "legend":["자재비","인건비","가공비"] }], "data":[ [10, 60, 10], [90,
-            90, 40], [70, 40, 70], [40, 30, 50] ] }
-        </textarea>
     </div>
     <div id="canvasArea">
         <canvas id="tutorial" width="1000" height="600"></canvas>
@@ -38,18 +28,6 @@
     <script type="text/javascript" language="javascript">
         $.when($.ready).then(function () {
             // Document is ready.
-            $("#btnResize").on('click', function () {
-
-                //var canvas = document.getElementById("tutorial");
-                var newCanvasWidth = $("#mCanvasWidth").val();
-                var newCanvasHeight = $("#mCanvasHeight").val();
-
-                exam.reload(newCanvasWidth, newCanvasHeight);
-                exam.init(DATA, options);
-
-            });
-
-            //var DATA = $('#mData').val();
 
             //Sampe JSON Data Schema
             var DATA =
