@@ -2,7 +2,7 @@ var KOSITV;
 if (!KOSITV) KOSITV = {};
 if (!KOSITV.StackedBar) KOSITV.StackedBar = {};
 
-KOSITV.StackedBar = function (pCanvasId) {
+KOSITV.StackedBar = function(pCanvasId) {
   var RGBA = [
     "rgba(200, 64, 43, 0.64)",
     "rgba(37, 195, 43, 0.64)",
@@ -33,17 +33,19 @@ KOSITV.StackedBar = function (pCanvasId) {
     guideColorAlpha: 0, //Stacted Bar Guide line alpha value
     guideFillYN: "N", //Stacted Bar Guide line to fill or to stroke
     onlyGroupBox: "N", //Only show group box
-    eventObject: [{
-      type: "C",
-      x: 0,
-      y: 0,
-      w: 0,
-      h: 0
-    }],
+    eventObject: [
+      {
+        type: "C",
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0
+      }
+    ],
     ctx: null
   };
 
-  var fnSetConfig = function (w, h, dataprop, OPT) {
+  var fnSetConfig = function(w, h, dataprop, OPT) {
     var ctxTotalWidth = w; //전체 Canvas 가로 크기
     var ctxTotalHeight = h; //전체 Canvas 세로 크기
 
@@ -86,19 +88,21 @@ KOSITV.StackedBar = function (pCanvasId) {
         typeof OPT.GuideFillYN !== "undefined" ? OPT.GuideFillYN : "N"),
       onlyGroupBox: (OPT.OnlyGroupBox =
         typeof OPT.OnlyGroupBox !== "undefined" ? OPT.OnlyGroupBox : "N"),
-      eventObject: [{
-        type: "C",
-        x: 0,
-        y: 0,
-        w: 0,
-        h: 0
-      }]
+      eventObject: [
+        {
+          type: "C",
+          x: 0,
+          y: 0,
+          w: 0,
+          h: 0
+        }
+      ]
     };
     //console.log(CFG);
   };
 
   //# make axis
-  var fnDrawAxis = function (ctx) {
+  var fnDrawAxis = function(ctx) {
     //X-Axis
     ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
     ctx.beginPath();
@@ -123,18 +127,18 @@ KOSITV.StackedBar = function (pCanvasId) {
   };
 
   //Draw background
-  var fnDrawBackground = function (ctx, prop, rgb) {
+  var fnDrawBackground = function(ctx, prop, rgb) {
     ctx.fillStyle = rgb;
     ctx.fillRect(prop.X, prop.Y, prop.W, prop.H);
   };
 
   //RGBA be less color
-  var fnMakeAlphaColor = function (rgba) {
+  var fnMakeAlphaColor = function(rgba) {
     var strRgb = rgba.substring(0, rgba.lastIndexOf(","));
     return strRgb + ", " + CFG.guideColorAlpha + ")";
   };
 
-  var fnConvertRgbToHex = function (rgba) {
+  var fnConvertRgbToHex = function(rgba) {
     CFG.ctx.fillStyle = "rgba(0, 0, 0, 0)";
     // We're reusing the canvas, so fill it with something predictable
     CFG.ctx.clearRect(0, 0, 1, 1);
@@ -144,19 +148,19 @@ KOSITV.StackedBar = function (pCanvasId) {
     var a = CFG.ctx.getImageData(0, 0, 1, 1).data;
     // Sigh, you can't map() typed arrays
     var hex = [0, 1, 2]
-      .map(function (i) {
+      .map(function(i) {
         return fnByteToHex(a[i]);
       })
       .join("");
     return "#" + hex;
   };
 
-  var fnByteToHex = function (byte) {
+  var fnByteToHex = function(byte) {
     return ("0" + byte.toString(16)).slice(-2);
   };
 
   //Draw Guide line
-  var fnDrawGuideLine = function (ctx, box1, box2, rgba) {
+  var fnDrawGuideLine = function(ctx, box1, box2, rgba) {
     ctx.fillStyle = rgba;
     ctx.beginPath();
     ctx.moveTo(box1.RTTP.x, box1.RTTP.y);
@@ -175,7 +179,7 @@ KOSITV.StackedBar = function (pCanvasId) {
   };
 
   //# make one box by Group
-  var fnDrawBox = function (ctx, prop) {
+  var fnDrawBox = function(ctx, prop) {
     var displayGroup = CFG.onlyGroupBox; //Group view display
 
     var tmp = {
@@ -225,7 +229,7 @@ KOSITV.StackedBar = function (pCanvasId) {
   };
 
   //# make axis X,Y
-  var fnMakeGroupPosition = function (maxValue, arrGroup) {
+  var fnMakeGroupPosition = function(maxValue, arrGroup) {
     var maxCanvasHeight = CFG.ctxAvailableHeight; //여백을 제외한 Canvas 사용 총 높이
     //var maxDataY = dataSet.slice(0).sort().reverse()[0];
     var maxDataY = maxValue;
@@ -256,7 +260,7 @@ KOSITV.StackedBar = function (pCanvasId) {
   };
 
   //Get max data value, Get data count
-  var fnGetDataProp = function (data) {
+  var fnGetDataProp = function(data) {
     //X축의 Count
     var nDataCnt = data.length;
     //X축별 Data sum array
@@ -266,7 +270,7 @@ KOSITV.StackedBar = function (pCanvasId) {
       sumValue = data[i].reduce((x, y) => x + y); //Group value sum
       arrValues.push(parseInt(sumValue));
     }
-    var maxDataValue = arrValues.slice(0).sort(function (a, b) {
+    var maxDataValue = arrValues.slice(0).sort(function(a, b) {
       return b - a;
     })[0]; //ValueGroup Max value
 
@@ -282,7 +286,7 @@ KOSITV.StackedBar = function (pCanvasId) {
   };
 
   //Call draw function for guide line
-  var fnCallDrawGuide = function (ctx, arrBoxAttr) {
+  var fnCallDrawGuide = function(ctx, arrBoxAttr) {
     var GuideXAxisCnt = arrBoxAttr.length;
     var GuideYAxisCnt = 0;
 
@@ -302,7 +306,7 @@ KOSITV.StackedBar = function (pCanvasId) {
   };
 
   //Box 4Point 설정
-  var fnMakeBoxPoint = function (boxProp) {
+  var fnMakeBoxPoint = function(boxProp) {
     var pos = {
       x: boxProp.X,
       y: boxProp.Y
@@ -339,7 +343,7 @@ KOSITV.StackedBar = function (pCanvasId) {
   };
 
   //Drawing Box by Group
-  var fnDrawGroupBox = function (CTX, _mo) {
+  var fnDrawGroupBox = function(CTX, _mo) {
     var prop = {
       X: 0,
       Y: 0,
@@ -356,7 +360,7 @@ KOSITV.StackedBar = function (pCanvasId) {
     }
   };
 
-  var fnDrawLable = function (ctx, label, groupPos) {
+  var fnDrawLable = function(ctx, label, groupPos) {
     var labelYPoint = CFG.ctxTopMargin + CFG.ctxAvailableHeight;
     var labelXBasePoint = CFG.ctxLeftMargin;
     var axisBaseLineHeight = 5;
@@ -385,7 +389,7 @@ KOSITV.StackedBar = function (pCanvasId) {
   };
 
   //Draw Comment box
-  var fnDrawComment = function (ctx) {
+  var fnDrawComment = function(ctx) {
     var canvasWidth = CFG.ctxWholeWidth;
     var x = 60;
     var y = 10;
@@ -414,7 +418,7 @@ KOSITV.StackedBar = function (pCanvasId) {
     }); //Event handler용 객체 저장
   };
 
-  var fnDrawLegend = function (ctx, legend) {
+  var fnDrawLegend = function(ctx, legend) {
     var legendTopMargin = 24;
     var legendTextWidth = 30;
     var legendTextLeftMargin = 15;
@@ -450,17 +454,17 @@ KOSITV.StackedBar = function (pCanvasId) {
     }
   };
 
-  var fnMakeEventObject = function (evtObj) {
+  var fnMakeEventObject = function(evtObj) {
     //eventObject: [{ type: 'C', x: 0, y: 0, w: 0, h: 0 }]
     CFG.eventObject.push(evtObj);
   };
 
-  var fnEventHandler = function (eX, eY) {
+  var fnEventHandler = function(eX, eY) {
     //console.log(eX + " : " + eY);
   };
 
   //객체의 Property 존재여부 체크
-  var cmmCheckProperty = function (obj) {
+  var cmmCheckProperty = function(obj) {
     var result = true;
     var temp = "";
     try {
@@ -496,7 +500,7 @@ KOSITV.StackedBar = function (pCanvasId) {
       dtBoxPos: [] //개별 Box별 시작 Position, 가로/세로 크기 배열 attributes
     },
     _opt: {},
-    _initCtx: function () {
+    _initCtx: function() {
       var resultFlag = true;
       if (pCanvasId.length == 0) {
         resultFlag = false;
@@ -520,7 +524,7 @@ KOSITV.StackedBar = function (pCanvasId) {
       }
       return resultFlag;
     },
-    _setData: function (pData) {
+    _setData: function(pData) {
       var result = true;
 
       //JSON Data setting
@@ -528,8 +532,8 @@ KOSITV.StackedBar = function (pCanvasId) {
         var json = JSON.parse(pData);
 
         var data = json.data;
-        this._label = json.title[0].label;
-        this._legend = json.title[0].legend;
+        this._label = json.title.label;
+        this._legend = json.title.legend;
 
         this._MO.dtOrgDataSet = data;
 
@@ -547,7 +551,7 @@ KOSITV.StackedBar = function (pCanvasId) {
 
       return result;
     },
-    _setOption: function (opt) {
+    _setOption: function(opt) {
       var options = {
         GuideAlpha: 0.2,
         GuideFillYN: "N",
@@ -570,26 +574,26 @@ KOSITV.StackedBar = function (pCanvasId) {
       }
       this._opt = options;
     },
-    _event: function () {
+    _event: function() {
       $(this._canvas)
-        .on("mousemove", function (e) {
+        .on("mousemove", function(e) {
           //console.log(e.pageX, e.pageY);
           //ctx.fnEventHandler(e.pageX, e.pageY);
           //console.log(e.pageX + "," + e.pageY);
         })
-        .on("mouseout", function () {
+        .on("mouseout", function() {
           //console.log("out");
         })
-        .on("click", function () {});
+        .on("click", function() {});
     },
-    reload: function (newX, newY) {
+    reload: function(newX, newY) {
       var ctx = this._ctx;
       // 픽셀 정리
       ctx.clearRect(0, 0, newX, newY);
       // 컨텍스트 리셋
       ctx.beginPath();
     },
-    init: function (pData, pOption) {
+    init: function(pData, pOption) {
       //# 1.init Canvas,Context
       if (!this._initCtx()) {
         alert("Check the Canvas ID!");
@@ -605,7 +609,8 @@ KOSITV.StackedBar = function (pCanvasId) {
       //# 4.Set Config
       fnSetConfig(
         this._canvasCfg.width,
-        this._canvasCfg.height, {
+        this._canvasCfg.height,
+        {
           count: this._MO.dtGroup.colCnt,
           maxValue: this._MO.dtGroup.maxValue
         },
