@@ -17,50 +17,44 @@ The guide line for Stacked bar chart
 
 ### JavaScript (jQuery)
 
-JSON Data
+* JSON Data
 
 ```js
 var DATA =
   '                                        \
-              {                                               \
-                  "title":[{                                  \
-                      "title":"Quarter Spending",                    \
-                      "label":["Jan","Feb","Mar","Apr"],       \
-                      "legend":["Material cost","Labor cost","Etc cost"]     \
-                  }],                                         \
-                  "data":[                                    \
-                      [10, 60, 10],                           \
-                      [90, 90, 40],                           \
-                      [70, 40, 70],                           \
-                      [40, 30, 50]                            \
-                  ]                                           \
-              }                                               \
-          ';
+                            {                                               \
+                                "title":[{                                  \
+                                    "title":"Quarter Spending",                    \
+                                    "label":["Jan","Feb","Mar","Apr"],       \
+                                    "legend":["Material cost","Labor cost","Etc cost"]     \
+                                }],                                         \
+                                "data":[                                    \
+                                    [10, 60, 10],                           \
+                                    [90, 90, 40],                           \
+                                    [70, 40, 70],                           \
+                                    [40, 30, 50]                            \
+                                ]                                           \
+                            }                                               \
+                        ';
 ```
 
-```js
-/*
-    javascript Library : KOSITV.StackedBar
-    - Param : canvas element id
-*/
+* initialize
 
-//StackedBar guide chart
+```js
+//parameter : canvas element id
 var myChart = new KOSITV.StackedBar("myChart");
 myChart.init(DATA);
 ```
 
-Use options
+* Use options
+
+- guideAlpha: 0.2, //Box Guide Line Alpha value : 0.0 ~1.0
+- guideFillYN: "N", //Box Guide Line 을 라인만 표시 or 색상도 표시 여부 : Y(색상표시), N(선만)
+- useComment: "Y", //[개발중]User Comment 표시 기능 : Y(Comment 표시), N(표시하지 않음)
+- useGuideLine: "Y", //Box Guide Line 표시 여부 : Y(사용), N(표시하지 않음)
+- onlyGroupBox: "N" //Box 를 x 축별 누적으로 표시 : Y(누적표시), N(개별 표시)
 
 ```js
-/*
-var options = {
-    guideAlpha: 0.2,                //Box Guide Line Alpha value : 0.0 ~1.0
-    guideFillYN: "N",               //Box Guide Line을 라인만 표시 or 색상도 표시 여부 : Y(색상표시), N(선만)
-    useComment: "Y",                //[개발중]User Comment 표시 기능 : Y(Comment 표시), N(표시하지 않음)
-    useGuideLine: "Y",              //Box Guide Line 표시 여부 : Y(사용), N(표시하지 않음)
-    onlyGroupBox: "N"               //Box를 x축별 누적으로 표시 : Y(누적표시), N(개별 표시)
-};
-*/
 var options = {
   useGuideLine: "Y",
   guideFillYN: "Y"
