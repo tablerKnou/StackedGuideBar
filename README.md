@@ -1,4 +1,4 @@
-# StackedGuideBar
+# StackedBar
 
 The guide line for Stacked bar chart
 
@@ -17,17 +17,41 @@ The guide line for Stacked bar chart
 
 ### JavaScript (jQuery)
 
+JSON Data
+
+```js
+var DATA =
+  '                                        \
+              {                                               \
+                  "title":[{                                  \
+                      "title":"Quarter Spending",                    \
+                      "label":["Jan","Feb","Mar","Apr"],       \
+                      "legend":["Material cost","Labor cost","Etc cost"]     \
+                  }],                                         \
+                  "data":[                                    \
+                      [10, 60, 10],                           \
+                      [90, 90, 40],                           \
+                      [70, 40, 70],                           \
+                      [40, 30, 50]                            \
+                  ]                                           \
+              }                                               \
+          ';
+```
+
 ```js
 /*
     javascript Library : KOSITV.StackedBar
     - Param : canvas element id
 */
 
-//StackedBar guide chart without options
+//StackedBar guide chart
 var myChart = new KOSITV.StackedBar("myChart");
 myChart.init(DATA);
+```
 
-//Use options
+Use options
+
+```js
 /*
 var options = {
     guideAlpha: 0.2,                //Box Guide Line Alpha value : 0.0 ~1.0
