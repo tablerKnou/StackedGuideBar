@@ -20,21 +20,21 @@ The guide line for Stacked bar chart
 
 ```js
 var DATA =
-                '                                        
-                {                                               
-                    "title":{                                  
-                        "title":"Quarter Spending",                    
-                        "label":["Estimate price","Market price","Proposer price","Proposer"],       
-                        "legend":["Material","Labor","Processing"]     
-                    },                                         
-                    "data":[                                    
-                        [10, 60, 10],                           
-                        [90, 90, 40],                           
-                        [80, 70, 40],                           
-                        [70, 40, 70]                           
-                    ],                                           
-                    "comment":"Comment is in here"       
-                }                                               
+                '                                        \
+                {                                               \
+                    "title":{                                  \
+                        "title":"Quarter Spending",                    \
+                        "label":["Estimate price","Market price","Proposer price","Proposer"],       \
+                        "legend":["Material","Labor","Processing"]     \
+                    },                                         \
+                    "data":[                                    \
+                        [10, 60, 10],                           \
+                        [90, 90, 40],                           \
+                        [80, 70, 40],                           \
+                        [70, 40, 70]                           \
+                    ],                                           \
+                    "comment":"Comment is in here"       \
+                }                                               \
             ';
 ```
 
