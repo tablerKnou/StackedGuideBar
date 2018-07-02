@@ -3,7 +3,7 @@ if (!KOSITV) KOSITV = {};
 if (!KOSITV.StackedBar) KOSITV.StackedBar = {};
 
 KOSITV.StackedBar = function(pCanvasId) {
-  var RGBA = [
+  var RGBA_OLD = [
     "rgba(200, 64, 43, 0.64)",
     "rgba(37, 195, 43, 0.64)",
     "rgba(84, 64, 201, 0.64)",
@@ -14,6 +14,20 @@ KOSITV.StackedBar = function(pCanvasId) {
     "rgba(97, 103, 50, 0.64)",
     "rgba(255, 101, 161, 0.64)",
     "rgba(255, 62, 40, 0.64)"
+  ];
+
+  var RGBA = [
+    "rgba(255, 179, 186, 0.90)",
+    "rgba(186, 255, 201, 0.90)",
+    "rgba(186, 225, 255, 0.90)",
+    "rgba(255, 223, 186, 0.90)",
+    "rgba(255, 255, 186, 0.90)",
+    "rgba(141, 225, 255, 0.90)",
+    "rgba(180, 232, 22, 0.90)",
+    "rgba(97, 103, 50, 0.90)",
+    "rgba(255, 101, 161, 0.90)",
+    "rgba(255, 62, 40, 0.90)",
+    "rgba(255, 255, 255, 0.90)"
   ];
 
   var CFG = {
@@ -49,8 +63,8 @@ KOSITV.StackedBar = function(pCanvasId) {
     var ctxTotalWidth = w; //전체 Canvas 가로 크기
     var ctxTotalHeight = h; //전체 Canvas 세로 크기
 
-    var ctxTopMargin = 30; //상단 여백
-    var ctxBottomMargin = 60; //하단 여백
+    var ctxTopMargin = 100; //상단 여백
+    var ctxBottomMargin = 50; //하단 여백
     var ctxLeftMargin = 50; //좌 여백
     var ctxRightMargin = 60; //우 여백
 
@@ -64,7 +78,7 @@ KOSITV.StackedBar = function(pCanvasId) {
 
     //box margin 동적 계산
     var calcBoxWidth = Math.round(ctxAvailableWidth / dataWidthCount);
-    var boxRightMargin = Math.floor(calcBoxWidth * 11 / 32); //      11/32 %
+    var boxRightMargin = Math.floor(calcBoxWidth * 5 / 32); //      11/32 %
     var boxWidth = calcBoxWidth - boxRightMargin;
 
     CFG = {
@@ -83,7 +97,7 @@ KOSITV.StackedBar = function(pCanvasId) {
       boxRightMargin: boxRightMargin,
       boxWidth: boxWidth,
       guideColorAlpha: (OPT.GuideAlpha =
-        typeof OPT.GuideAlpha !== "undefined" ? OPT.GuideAlpha : 0.2),
+        typeof OPT.GuideAlpha !== "undefined" ? OPT.GuideAlpha : 0.5),
       guideFillYN: (OPT.GuideFillYN =
         typeof OPT.GuideFillYN !== "undefined" ? OPT.GuideFillYN : "N"),
       onlyGroupBox: (OPT.OnlyGroupBox =
@@ -389,69 +403,83 @@ KOSITV.StackedBar = function(pCanvasId) {
   };
 
   //Draw Comment box
-  var fnDrawComment = function(ctx) {
-    var canvasWidth = CFG.ctxWholeWidth;
-    var x = 60;
-    var y = 10;
-    var r = 20;
-    var w = 50;
-    var h = 40;
-    var posX = canvasWidth - w - 10;
+  var fnDrawComment = function(mComment, mProp, mCtxPos) {
+    var nComment = mComment.length;
 
-    ctx.beginPath();
-    //ctx.arc(posX, y, r, 0, 2 * Math.PI);
-    ctx.fillStyle = "rgba(115, 104, 89, 0.78)";
-    ctx.fillRect(posX, y, w, h);
-    //ctx.fill();
+    if(nComment > 0){
+      var tCommentBox = document.createElement('textarea');
+      tCommentBox.setAttribute('name', 'myComment');
+      tCommentBox.setAttribute('maxlength', 5000);
+      tCommentBox.style.width = CFG.ctxRightMargin;   //Canvas Right Margin 크기를 Textarea로 사용
+      tCommentBox.style.height = mProp.H;             //Canvas의 Drawing area height를 Textarea로 사용
+      tCommentBox.value = mComment;
 
-    ctx.font = "28pt Georgia";
-    ctx.fillStyle = "black";
-    ctx.textAlign = "Left";
-    ctx.fillText("C", posX + 10, y + 28 + 5);
+      //console.log('draw BG = ' + mProp.X + " : " + mProp.Y);
+      //console.log('Canvas pos = ' + mCtxPos.x + " : " + mCtxPos.y);
 
-    fnMakeEventObject({
-      type: "C",
-      x: posX,
-      y: y,
-      w: w,
-      h: h
-    }); //Event handler용 객체 저장
+      var tMyArea = document.createElement('div');
+      tMyArea.style.position = 'absolute';
+      tMyArea.style.top = mCtxPos.y + mProp.Y;                  // Canvas Element의 높이(Top) + Canvas내의 Draw area 높이(Top)
+      // Canvas Element의 왼쪽 위치(Left) + Canvas 전체의 가로길이(Width) - Canvas내 우측 여백 
+      tMyArea.style.left = mCtxPos.x + CFG.ctxWholeWidth - CFG.ctxRightMargin;  
+      tMyArea.style.width = CFG.ctxRightMargin;
+      tMyArea.style.height = mProp.H;                         //Canvas의 Drawing area height를 Textarea로 사용
+
+      tMyArea.appendChild(tCommentBox);
+
+      document.body.appendChild(tMyArea);
+    }
+    
   };
 
   var fnDrawLegend = function(ctx, legend) {
     var legendTopMargin = 24;
-    var legendTextWidth = 30;
-    var legendTextLeftMargin = 15;
-    var legendBoxHeight = 30;
+    var legendBoxWidth = 40;
+    var legendTextRightMargin = 10;
+    var legendBoxHeight = 20;
+    var legendBottomMargin = 20;
     var legendCnt = legend.length;
-    var labelYPoint =
-      CFG.ctxTopMargin + CFG.ctxAvailableHeight + legendTopMargin;
-    var labelXBasePoint = CFG.ctxLeftMargin;
-    var legendBoxAreaWidth = Math.round(CFG.ctxAvailableWidth / legendCnt);
-    var legendBoxAreaWidthHalf = Math.floor(legendBoxAreaWidth / 2);
+    var legendBoxTextPadding = 1;
+
+    var labelYPoint = CFG.ctxTopMargin - legendBoxHeight - legendBottomMargin;    //위치 상단으로 이동
 
     ctx.font = "10pt Calibri";
 
-    for (var i = 0; i < legendCnt; i++) {
-      var xTextWidth = ctx.measureText(legend[i]).width;
-      var xPoint =
-        legendBoxAreaWidth * (i + 1) - legendBoxAreaWidthHalf - legendTextWidth;
+    //set Legend Text & total size
+    var xTextWidth = [];
+    var xSumLegend = 0;
+    for(var i=0; i<legendCnt; i++){
+      xTextWidth[i] = ctx.measureText(legend[i]).width;
+      xSumLegend += xTextWidth[i] + legendBoxTextPadding;  
+    }
+    
+    xSumLegend += (legendTextRightMargin)* (legendCnt-1); //전체 Text right margin
+    xSumLegend += (legendBoxWidth)* legendCnt;           //전체 Legend Box 영역
 
+    // Canvas Left margin + (Canvas_draw_width - legend_total_width)/2
+    var xStartPos = CFG.ctxLeftMargin + Math.floor((CFG.ctxAvailableWidth - xSumLegend)/2);
+    var xPoint = xStartPos;
+
+    for (var i = 0; i < legendCnt; i++) {
       ctx.fillStyle = RGBA[i]; //Set the Box Color
       ctx.fillRect(
         xPoint,
         labelYPoint,
-        xTextWidth + legendTextWidth,
+        legendBoxWidth,
         legendBoxHeight
       );
+      xPoint += legendBoxWidth + legendBoxTextPadding;          //Legend Box size
+
       ctx.textAlign = "start";
-      ctx.fillStyle = "white";
+      ctx.fillStyle = "black";
       ctx.fillText(
         legend[i],
-        xPoint + legendTextWidth / 2,
-        labelYPoint + legendTopMargin - 2
+        xPoint,
+        labelYPoint + legendTopMargin - 10
       );
+      xPoint += xTextWidth[i] + legendTextRightMargin;  //Legend Text size + 우측여백
     }
+    
   };
 
   var fnMakeEventObject = function(evtObj) {
@@ -462,6 +490,12 @@ KOSITV.StackedBar = function(pCanvasId) {
   var fnEventHandler = function(eX, eY) {
     //console.log(eX + " : " + eY);
   };
+
+  //Canvas 영역 디버깅을 위한 함수
+  var commCheckArea = function(ctx, cX, cY, cW, cH, cRGB){
+    ctx.fillStyle = cRGB == 'undefined' ? RGBA[0] : cRGB; //Set the Box Color
+    ctx.fillRect(cX,cY,cW,cH);
+  }
 
   //객체의 Property 존재여부 체크
   var cmmCheckProperty = function(obj) {
@@ -475,10 +509,38 @@ KOSITV.StackedBar = function(pCanvasId) {
     return result;
   };
 
+  //객체의 Position 가져오기 without jquery 
+  var getPosition = function(el){
+    var xPos = 0;
+    var yPos = 0;
+  
+    while (el) {
+      if (el.tagName == "BODY") {
+        // deal with browser quirks with body/window/document and page scroll
+        var xScroll = el.scrollLeft || document.documentElement.scrollLeft;
+        var yScroll = el.scrollTop || document.documentElement.scrollTop;
+  
+        xPos += (el.offsetLeft - xScroll + el.clientLeft);
+        yPos += (el.offsetTop - yScroll + el.clientTop);
+      } else {
+        // for all other non-BODY elements
+        xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+        yPos += (el.offsetTop - el.scrollTop + el.clientTop);
+      }
+  
+      el = el.offsetParent;
+    }
+    return {
+      x: xPos,
+      y: yPos
+    };
+  };
+
   //Canvas ID
   //Data Set
   //Option
   var stackedBarGuide = {
+    _VER: '1.01',
     _CFG: CFG,
     _canvas: null,
     _ctx: null,
@@ -488,6 +550,7 @@ KOSITV.StackedBar = function(pCanvasId) {
     },
     _label: null,
     _legend: null,
+    _comment: null,
     _MO: {
       dtOrgDataSet: [],
       dtGroup: {
@@ -534,6 +597,7 @@ KOSITV.StackedBar = function(pCanvasId) {
         var data = json.data;
         this._label = json.title.label;
         this._legend = json.title.legend;
+        this._comment = json.comment;
 
         this._MO.dtOrgDataSet = data;
 
@@ -574,6 +638,7 @@ KOSITV.StackedBar = function(pCanvasId) {
       }
       this._opt = options;
     },
+    /*
     _event: function() {
       $(this._canvas)
         .on("mousemove", function(e) {
@@ -586,6 +651,7 @@ KOSITV.StackedBar = function(pCanvasId) {
         })
         .on("click", function() {});
     },
+    */
     reload: function(newX, newY) {
       var ctx = this._ctx;
       // 픽셀 정리
@@ -594,6 +660,7 @@ KOSITV.StackedBar = function(pCanvasId) {
       ctx.beginPath();
     },
     init: function(pData, pOption) {
+      console.log('KOSITV.StackedBar v' + this._VER);
       //# 1.init Canvas,Context
       if (!this._initCtx()) {
         alert("Check the Canvas ID!");
@@ -626,7 +693,7 @@ KOSITV.StackedBar = function(pCanvasId) {
         W: this._canvasCfg.width,
         H: this._canvasCfg.height
       };
-      fnDrawBackground(this._ctx, prop, "rgba(244, 245, 186, 0.2)");
+      //fnDrawBackground(this._ctx, prop, "rgba(244, 245, 186, 0.2)");
 
       //real chart arae
       prop = {
@@ -635,6 +702,7 @@ KOSITV.StackedBar = function(pCanvasId) {
         W: CFG.ctxAvailableWidth,
         H: CFG.ctxAvailableHeight
       };
+      //Drawing area 
       //fnDrawBackground(this._ctx, prop, "rgba(244, 245, 136, 0.64)");
 
       //Make Axis
@@ -661,9 +729,12 @@ KOSITV.StackedBar = function(pCanvasId) {
         fnCallDrawGuide(this._ctx, this._MO.dtBoxPos);
 
       //Comment Box
-      if (this._opt.UseComment == "Y") fnDrawComment(this._ctx);
+      if (this._opt.UseComment == "Y"){
+        var canvasPos = getPosition(document.getElementById(pCanvasId));
+        fnDrawComment(this._comment, prop, canvasPos);
+      } 
 
-      this._event();
+      //this._event();      //추후 mouse event handler 기능이 필요할 경우 with jQuery
     }
   };
 

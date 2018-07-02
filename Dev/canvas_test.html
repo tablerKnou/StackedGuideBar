@@ -26,15 +26,16 @@
         <br />
         <br/> Data Set :
         <textarea cols="50" rows="10" id="mData" style="display:none;">
-            { "title":[{ "title":"1분기 지출", "label":["1월","2월","3월","4월"], "legend":["자재비","인건비","가공비"] }], "data":[ [10, 60, 10], [90,
-            90, 40], [70, 40, 70], [40, 30, 50] ] }
+            { "title":{ "title":"1분기 지출", "label":["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"], "legend":["자제비","인건비","가공비"]
+            }, "data":[ [10,60,10], [90,70,40], [80,80,70], [70,90,70], [60,10,80], [80,20,90], [40,40,20], [50,40,30], [60,30,40],
+            [70,50,50], [80,60,60], [10,70,50] ] }
         </textarea>
     </div>
     <div id="canvasArea">
         <canvas id="tutorial" width="1000" height="600"></canvas>
         <canvas id="tutorial2" width="1000" height="600"></canvas>
     </div>
-    <script type="text/javascript" language="javascript" src="stackedBarGuide.js"></script>
+    <script type="text/javascript" language="javascript" src="../stackedBarGuide.js"></script>
     <script type="text/javascript" language="javascript">
         $.when($.ready).then(function () {
             // Document is ready.
@@ -49,9 +50,10 @@
 
             });
 
-            //var DATA = $('#mData').val();
+            var DATA = $('#mData').val();
 
             //Sampe JSON Data Schema
+            /*
             var DATA =
                 '                                        \
                 {                                               \
@@ -68,7 +70,7 @@
                     ]                                           \
                 }                                               \
             ';
-
+            */
 
             /*
                 Chart Library : KOSITV.StackedBar
