@@ -207,7 +207,7 @@ KOSITV.StackedBar = function(pCanvasId) {
     var arrPos = [];
 
     if (displayGroup == "N") {
-      for (var i = prop.orgData.length-1; i > -1; i--) {
+      for (var i = prop.orgData.length-1; i > -1; i--) {  //Data 표시 순서를 아래부터 표기
       //for (var i = 0; i < prop.orgData.length; i++) {
         tmpH = prop.H * prop.orgData[i] / prop.orgGroupSum; //box별 Height 계산
         tmp = {
