@@ -207,7 +207,8 @@ KOSITV.StackedBar = function(pCanvasId) {
     var arrPos = [];
 
     if (displayGroup == "N") {
-      for (var i = 0; i < prop.orgData.length; i++) {
+      for (var i = prop.orgData.length-1; i > -1; i--) {
+      //for (var i = 0; i < prop.orgData.length; i++) {
         tmpH = prop.H * prop.orgData[i] / prop.orgGroupSum; //box별 Height 계산
         tmp = {
           X: tmp.X,
@@ -595,8 +596,8 @@ KOSITV.StackedBar = function(pCanvasId) {
         var json = JSON.parse(pData);
 
         var data = json.data;
-        this._label = json.title.label;
-        this._legend = json.title.legend;
+        this._label = json.title.columns;
+        this._legend = json.title.items;
         this._comment = json.comment;
 
         this._MO.dtOrgDataSet = data;
