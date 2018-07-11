@@ -1,136 +1,26 @@
+/*
+  2018.07.06. PYG
+  - Plug-in 전체 구조 변경
+*/
+
 var KOSITV;
 if (!KOSITV) KOSITV = {};
 if (!KOSITV.StackedBar) KOSITV.StackedBar = {};
 
 KOSITV.StackedBar = function(pCanvasId) {
-  var RGBA_OLD = [
-    "rgba(200, 64, 43, 0.64)",
-    "rgba(37, 195, 43, 0.64)",
-    "rgba(84, 64, 201, 0.64)",
-    "rgba(112, 245, 236, 0.64)",
-    "rgba(141, 98, 131, 0.64)",
-    "rgba(141, 98, 22, 0.64)",
-    "rgba(180, 232, 22, 0.64)",
-    "rgba(97, 103, 50, 0.64)",
-    "rgba(255, 101, 161, 0.64)",
-    "rgba(255, 62, 40, 0.64)"
-  ];
-
-  var RGBA = [
-    "rgba(255, 179, 186, 0.90)",
-    "rgba(186, 255, 201, 0.90)",
-    "rgba(186, 225, 255, 0.90)",
-    "rgba(255, 223, 186, 0.90)",
-    "rgba(255, 255, 186, 0.90)",
-    "rgba(141, 225, 255, 0.90)",
-    "rgba(180, 232, 22, 0.90)",
-    "rgba(97, 103, 50, 0.90)",
-    "rgba(255, 101, 161, 0.90)",
-    "rgba(255, 62, 40, 0.90)",
-    "rgba(255, 255, 255, 0.90)"
-  ];
+  var RGBA = [ "rgba(255, 179, 186, 0.90)"];
 
   var CFG = {
     ctxWholeWidth: 0,
-    ctxWholeHeight: 0,
-    ctxAvailableWidth: 0,
-    ctxAvailableHeight: 0,
-    ctxTopMargin: 0,
-    ctxBottomMargin: 0,
-    ctxLeftMargin: 0,
-    ctxStartX: 0,
-    ctxStartY: 0,
-    dataCount: 0,
-    dataMaxHeight: 0,
-    boxRightMargin: 0,
-    boxWidth: 0,
-    guideColorAlpha: 0, //Stacted Bar Guide line alpha value
-    guideFillYN: "N", //Stacted Bar Guide line to fill or to stroke
-    onlyGroupBox: "N", //Only show group box
-    displayValueComma:"Y",
-    useValueUnit:1,
-    eventObject: [
-      {
-        type: "C",
-        x: 0,
-        y: 0,
-        w: 0,
-        h: 0
-      }
-    ],
-    ctx: null
+    
   };
 
   var fnSetConfig = function(w, h, dataprop, OPT) {
-    var totalWidth = w; //전체 Canvas 가로 크기
-    var totalHeight = h; //전체 Canvas 세로 크기
-
-    var topMargin = 100; //상단 여백
-    var bottomMargin = 50; //하단 여백
-    var leftMargin = 50; //좌 여백
-    var rightMargin = 60; //우 여백
-
-    var availableWidth = totalWidth - leftMargin - rightMargin; //우 여백 차감
-    var availableHeight = totalHeight - topMargin - bottomMargin; //상단 여백 차감
-    var availableXPoint = 0 + leftMargin; //Point 시작 X점
-    var availableYPoint = 0 + topMargin; //Point 시작 Y점
-
-    var xAxisLabelMarginX = 10;     //X Asix Legend left margin
-    var xAxisLabelMarginY = 20;     //X Asix Legend top margin
-
-    var fontLegend = 12;        //default font size
-    var fontLabel = 12;         //default font size
-    var fontValue = 12;         //default font size
-
-    var firstBoxLeftPadding = 44; //Left padding of First Box 
-    var fontValueColor = "rgba(0, 0, 0, 1)";      //default value font color 
-
-    var dataWidthCount = dataprop.count;
-    var dataMaxHeight = dataprop.maxValue;
-
-    //box margin 동적 계산
-    var calcBoxWidth = Math.round(availableWidth / dataWidthCount);
-    var boxRightMargin = Math.floor(calcBoxWidth * OPT.BoxMarginPercent / 32); //      11/32 %
-    var boxWidth = calcBoxWidth - boxRightMargin;
+    var ctxTotalWidth = w; //전체 Canvas 가로 크기
 
     CFG = {
-      ctxWholeWidth: totalWidth,
-      ctxWholeHeight: totalHeight,
-      ctxAvailableWidth: availableWidth,
-      ctxAvailableHeight: availableHeight,
-      ctxTopMargin: topMargin,
-      ctxBottomMargin: bottomMargin,
-      ctxLeftMargin: leftMargin,
-      ctxRightMargin: rightMargin,
-      ctxStartX: availableXPoint,
-      ctxStartY: availableYPoint,
-      ctxXAxisLabelMarginX : xAxisLabelMarginX,
-      ctxXAxisLabelMarginY : xAxisLabelMarginY,
-      ctxFontLegend: typeof OPT.FontLegend !== "undefined" ? OPT.FontLegend : fontLegend,
-      ctxFontLabel:typeof OPT.FontLabel !== "undefined" ? OPT.FontLabel : fontLabel,
-      ctxFontValue:typeof OPT.FontValue !== "undefined" ? OPT.FontValue : fontValue,
-      ctxFontValueColor:typeof OPT.FontValueColor !== "undefined" ? OPT.FontValueColor : fontValueColor,
-      dataCount: dataWidthCount,
-      dataMaxHeight: dataMaxHeight,
-      boxRightMargin: boxRightMargin,
-      boxWidth: boxWidth,
-      ctxFirstBoxLeftPadding:firstBoxLeftPadding,
-      guideColorAlpha: typeof OPT.GuideAlpha !== "undefined" ? OPT.GuideAlpha : 0.5,
-      guideFillYN: typeof OPT.GuideFillYN !== "undefined" ? OPT.GuideFillYN : "N",
-      onlyGroupBox: typeof OPT.OnlyGroupBox !== "undefined" ? OPT.OnlyGroupBox : "N",
-      displayValueComma: typeof OPT.displayValueComma !== "undefined" ? OPT.displayValueComma : "Y",
-      useValueUnit: typeof OPT.useValueUnit !== "undefined" ? OPT.useValueUnit : 1,
-      eventObject: [
-        {
-          type: "C",
-          x: 0,
-          y: 0,
-          w: 0,
-          h: 0
-        }
-      ]
+      ctxWholeWidth: ctxTotalWidth
     };
-    //console.log(CFG);
   };
 
   //# make axis
@@ -144,17 +34,6 @@ KOSITV.StackedBar = function(pCanvasId) {
       CFG.ctxTopMargin + CFG.ctxAvailableHeight
     );
     ctx.lineWidth = 0.6;
-    //ctx.closePath();
-    ctx.stroke();
-    //ctx.fill();
-
-    //Y-Axis
-    ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-    ctx.beginPath();
-    ctx.moveTo(CFG.ctxLeftMargin, CFG.ctxTopMargin);
-    ctx.lineTo(CFG.ctxLeftMargin, CFG.ctxTopMargin + CFG.ctxAvailableHeight);
-    ctx.lineWidth = 0.6;
-    //ctx.closePath();
     ctx.stroke();
 
   };
@@ -172,19 +51,11 @@ KOSITV.StackedBar = function(pCanvasId) {
   };
 
   var fnConvertRgbToHex = function(rgba) {
-    CFG.ctx.fillStyle = "rgba(0, 0, 0, 0)";
-    // We're reusing the canvas, so fill it with something predictable
-    CFG.ctx.clearRect(0, 0, 1, 1);
-    CFG.ctx.fillStyle = rgba;
-    CFG.ctx.fillRect(0, 0, 1, 1);
-
     var a = CFG.ctx.getImageData(0, 0, 1, 1).data;
     // Sigh, you can't map() typed arrays
-    var hex = [0, 1, 2]
-      .map(function(i) {
+    var hex = [0, 1, 2].map(function(i) {
         return fnByteToHex(a[i]);
-      })
-      .join("");
+      }).join("");
     return "#" + hex;
   };
 
@@ -221,23 +92,19 @@ KOSITV.StackedBar = function(pCanvasId) {
       W: prop.W,
       H: prop.H
     };
-    var tmpH = prop.H;    //Group Total Height
-
-    //console.log("########### group data list ############");
-    //console.log(prop);
+    var tmpH = prop.H;
 
     var arrPos = [];
 
     if (displayGroup == "N") {
       for (var i = prop.orgData.length-1; i > -1; i--) {  //Data 표시 순서를 아래부터 표기
       //for (var i = 0; i < prop.orgData.length; i++) {
-        tmpH = prop.H * prop.orgData[i] / prop.orgGroupSum; //box별 Height 계산 : GroupH * (Box Value/Total Value)
+        tmpH = prop.H * prop.orgData[i] / prop.orgGroupSum; //box별 Height 계산
         tmp = {
           X: tmp.X,
           Y: tmp.Y,
           W: tmp.W,
           H: tmpH,
-          Val: prop.orgData[i],
           point: {}
         };
 
@@ -274,7 +141,7 @@ KOSITV.StackedBar = function(pCanvasId) {
     var dataGroup = arrGroup;
 
     var BoxesAxis = [];
-    var stdLeftMargin = CFG.ctxFirstBoxLeftPadding;
+    var stdLeftMargin = 20;
 
     var boxWidth = CFG.boxWidth;
     var tmpXAxis = CFG.ctxStartX + stdLeftMargin;
@@ -283,9 +150,11 @@ KOSITV.StackedBar = function(pCanvasId) {
       var arr = {
         idx: i,
         X: tmpXAxis,
-        Y: ((maxDataY - dataGroup[i]) / maxDataY * maxCanvasHeight + CFG.ctxStartY),
+        Y:
+          (maxDataY - dataGroup[i]) / maxDataY * maxCanvasHeight +
+          CFG.ctxStartY,
         W: boxWidth,
-        H: (dataGroup[i] / maxDataY * maxCanvasHeight)
+        H: dataGroup[i] / maxDataY * maxCanvasHeight
       }; //X축 계산
       BoxesAxis.push(arr);
       tmpXAxis += CFG.boxWidth + CFG.boxRightMargin;
@@ -398,61 +267,12 @@ KOSITV.StackedBar = function(pCanvasId) {
 
   var fnDrawLable = function(ctx, label, groupPos) {
     var labelYPoint = CFG.ctxTopMargin + CFG.ctxAvailableHeight;
-    var labelXBasePoint = CFG.ctxLeftMargin;
-    var axisBaseLineHeight = 5;
-    var axisBaseLabelMarginX = CFG.ctxXAxisLabelMarginX;
-    var axisBaseLabelMarginY = CFG.ctxXAxisLabelMarginY;
-
-    for (var i = 0; i < groupPos.length; i++) {
-      var axis = groupPos[i];
-      var labelLength = ctx.measureText(label[i]).width;
-      var txtStartPos = axis.X + Math.round((axis.W-labelLength) / 2); //Group Box Start point + (Box Width-Label width)/2
-      var txtStartAxis = axis.X + Math.round(axis.W / 2); //Group Box Start point + Box Width/2
-
-      ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-      ctx.beginPath();
-      ctx.moveTo(txtStartAxis, labelYPoint - axisBaseLineHeight);
-      ctx.lineTo(txtStartAxis, labelYPoint + axisBaseLineHeight);
-      ctx.lineWidth = 1;
-      //ctx.closePath();
-      ctx.stroke();
-
-      ctx.font = "italic "+ CFG.ctxFontLabel +"pt Calibri";
-      ctx.fillText(
-        label[i],
-        txtStartPos,
-        labelYPoint + axisBaseLabelMarginY
-      );
-    }
+    
   };
 
   //Draw Comment box
   var fnDrawComment = function(mComment, mProp, mCtxPos) {
     var nComment = mComment.length;
-
-    if(nComment > 0){
-      var tCommentBox = document.createElement('textarea');
-      tCommentBox.setAttribute('name', 'myComment');
-      tCommentBox.setAttribute('maxlength', 5000);
-      tCommentBox.style.width = CFG.ctxRightMargin;   //Canvas Right Margin 크기를 Textarea로 사용
-      tCommentBox.style.height = mProp.H;             //Canvas의 Drawing area height를 Textarea로 사용
-      tCommentBox.value = mComment;
-
-      //console.log('draw BG = ' + mProp.X + " : " + mProp.Y);
-      //console.log('Canvas pos = ' + mCtxPos.x + " : " + mCtxPos.y);
-
-      var tMyArea = document.createElement('div');
-      tMyArea.style.position = 'absolute';
-      tMyArea.style.top = mCtxPos.y + mProp.Y;                  // Canvas Element의 높이(Top) + Canvas내의 Draw area 높이(Top)
-      // Canvas Element의 왼쪽 위치(Left) + Canvas 전체의 가로길이(Width) - Canvas내 우측 여백 
-      tMyArea.style.left = mCtxPos.x + CFG.ctxWholeWidth - CFG.ctxRightMargin;  
-      tMyArea.style.width = CFG.ctxRightMargin;
-      tMyArea.style.height = mProp.H;                         //Canvas의 Drawing area height를 Textarea로 사용
-
-      tMyArea.appendChild(tCommentBox);
-
-      document.body.appendChild(tMyArea);
-    }
     
   };
 
@@ -467,7 +287,7 @@ KOSITV.StackedBar = function(pCanvasId) {
 
     var labelYPoint = CFG.ctxTopMargin - legendBoxHeight - legendBottomMargin;    //위치 상단으로 이동
 
-    ctx.font = CFG.ctxFontLegend + "pt Calibri";
+    ctx.font = "10pt Calibri";
 
     //set Legend Text & total size
     var xTextWidth = [];
@@ -506,71 +326,6 @@ KOSITV.StackedBar = function(pCanvasId) {
     
   };
 
-  // Box별 Value값 표시 
-  var fnDrawBoxValue = function(ctx, boxProp){
-    var point = {};   //Loop용 변수객체
-    var prop = {
-      boxX:0,
-      boxY:0,
-      boxW:0,
-      boxH:0,
-      val:0,
-      length:0
-    };
-    var tmpValue = 0;
-
-    //Loop Columns
-    for(var col=0; col<boxProp.length;col++){
-      //Loop Items
-      for(var item=0; item<boxProp[col].length;item++){
-        point = boxProp[col][item].point;
-        tmpValue = fnDisplayValue(boxProp[col][item].Val);    //단위환산 및 Currency Format
-
-        prop = {
-          boxX:boxProp[col][item].X,
-          boxY:boxProp[col][item].Y,
-          boxW:boxProp[col][item].W,
-          boxH:boxProp[col][item].H,
-          val:tmpValue, 
-          txtlength: ctx.measureText(tmpValue).width,
-        };
-        //############ 첫번째 Item의 경우 Start Point 위치에 오류 확인 필요(Text Size 오류 예상)   #########
-        fnDrawText(ctx, prop.val, point.LFTP.x + Math.floor((prop.boxW - prop.txtlength)/2),  point.LFTP.y - ((point.LFTP.y - point.LFBT.y)/2));
-      }
-      
-    }
-
-    //###########  하단 단위 표시 작업 #################
-    //우측 하단, 단위길이만큼 좌로 이동, 하단에서 margin 적용 
-    if(CFG.useValueUnit != 0 && CFG.useValueUnit != 1){
-      var tBottomFlowUp = 10;
-      var tUnitText = "(1/" + CFG.useValueUnit + ")";
-      var tUnitTextLength = ctx.measureText(tUnitText).width;
-      var tRightEdgeX = CFG.ctxWholeWidth - tUnitTextLength - CFG.ctxRightMargin;
-      var tBottomEdgeY = CFG.ctxWholeHeight - tBottomFlowUp;
-      fnDrawText(ctx, tUnitText, tRightEdgeX, tBottomEdgeY);
-    }
-    
-  };
-
-  var fnDrawText = function(ctx, text, xPoint, yPoint) {
-    var fontSize = CFG.ctxFontValue;
-    ctx.font = fontSize + "pt Calibri";
-    ctx.textAlign = "start";
-    ctx.fillStyle = CFG.ctxFontValueColor;
-    ctx.fillText(text, xPoint, yPoint + Math.floor(fontSize/2));
-  };
-
-  var fnDisplayValue = function(mValue){
-    var val = mValue;
-    //단위 환산
-    if(CFG.useValueUnit != 1 && CFG.useValueUnit != 0)  val  = Math.floor(val/CFG.useValueUnit);
-    //Currency Format
-    if(CFG.displayValueComma == "Y") val = val.toLocaleString();
-
-    return val;
-  };
-
   var fnMakeEventObject = function(evtObj) {
     //eventObject: [{ type: 'C', x: 0, y: 0, w: 0, h: 0 }]
     CFG.eventObject.push(evtObj);
@@ -589,8 +344,10 @@ KOSITV.StackedBar = function(pCanvasId) {
   //객체의 Property 존재여부 체크
   var cmmCheckProperty = function(obj) {
     var result = true;
-
-    if(typeof obj === "undefined" || obj == null){
+    var temp = "";
+    try {
+      temp = obj;
+    } catch (e) {
       result = false;
     }
     return result;
@@ -627,7 +384,7 @@ KOSITV.StackedBar = function(pCanvasId) {
   //Data Set
   //Option
   var stackedBarGuide = {
-    _VER: '1.21',
+    _VER: '1.01',
     _CFG: CFG,
     _canvas: null,
     _ctx: null,
@@ -708,36 +465,20 @@ KOSITV.StackedBar = function(pCanvasId) {
         GuideFillYN: "N",
         UseComment: "N",
         UseGuideLine: "Y",
-        OnlyGroupBox: "N",
-        UseDisplayValue:"Y",
-        displayValue:"Y",
-        displayValueComma:"Y",
-        FontLegend:12,
-        FontLabel:12,
-        FontValue:12,
-        FontValueColor:"rgba(0, 0, 0, 1)",
-        BoxMarginPercent:10,      //내부적으로 Box 좌우여백 비율, 사용자가 전달가능
-        useValueUnit:1
+        OnlyGroupBox: "N"
       };
 
       if (typeof opt !== "undefined" && opt != null) {
-        if (cmmCheckProperty(opt.guideAlpha)) options.GuideAlpha = opt.guideAlpha;
-        if (cmmCheckProperty(opt.guideFillYN)) options.GuideFillYN = opt.guideFillYN;
-        if (cmmCheckProperty(opt.useComment)) options.UseComment = opt.useComment;
-        if (cmmCheckProperty(opt.useGuideLine)) options.UseGuideLine = opt.useGuideLine;
-        if (cmmCheckProperty(opt.onlyGroupBox)) options.OnlyGroupBox = opt.onlyGroupBox;
-
-        if (cmmCheckProperty(opt.legendNameSize)) options.FontLegend = opt.legendNameSize;
-        if (cmmCheckProperty(opt.xAxisNameSize)) options.FontLabel = opt.xAxisNameSize;
-        if (cmmCheckProperty(opt.valueFontSize)) options.FontValue = opt.valueFontSize;
-        if (cmmCheckProperty(opt.valueFontColor)) options.FontValueColor = opt.valueFontColor;
-
-        if(cmmCheckProperty(opt.useDisplayValue)) options.UseDisplayValue = opt.useDisplayValue;
-        if (cmmCheckProperty(opt.displayValueComma)) options.displayValueComma = opt.displayValueComma;
-        if (cmmCheckProperty(opt.useValueUnit)) options.useValueUnit = opt.useValueUnit;
-
-        if (cmmCheckProperty(opt.boxMarginPercent)) 
-          options.BoxMarginPercent = opt.boxMarginPercent;
+        if (cmmCheckProperty(opt.guideAlpha))
+          options.GuideAlpha = opt.guideAlpha;
+        if (cmmCheckProperty(opt.guideFillYN))
+          options.GuideFillYN = opt.guideFillYN;
+        if (cmmCheckProperty(opt.useComment))
+          options.UseComment = opt.useComment;
+        if (cmmCheckProperty(opt.useGuideLine))
+          options.UseGuideLine = opt.useGuideLine;
+        if (cmmCheckProperty(opt.onlyGroupBox))
+          options.OnlyGroupBox = opt.onlyGroupBox;
         //======== user Color option ============
         if (cmmCheckProperty(opt.userColor)){
           for(var i=0;i<opt.userColor.length;i++){
@@ -748,9 +489,15 @@ KOSITV.StackedBar = function(pCanvasId) {
 
       }
 
+
+
+      
+      console.log('========== RGBA ==============');
+      console.log(RGBA);
+
       this._opt = options;
     },
-    /*  // 사용자 Event 처리를 위해 .. 구현해야 하는데.. 
+    /*
     _event: function() {
       $(this._canvas)
         .on("mousemove", function(e) {
@@ -835,10 +582,6 @@ KOSITV.StackedBar = function(pCanvasId) {
 
       // Draw Group box
       fnDrawGroupBox(this._ctx, this._MO);
-
-      // Show Value
-      if(this._opt.UseDisplayValue == "Y") 
-        fnDrawBoxValue(this._ctx, this._MO.dtBoxPos);
 
       //Draw Box guide line
       if (this._opt.UseGuideLine == "Y")

@@ -78,19 +78,16 @@ KOSITV.StackedBar = function(pCanvasId) {
     var xAxisLabelMarginX = 10;     //X Asix Legend left margin
     var xAxisLabelMarginY = 20;     //X Asix Legend top margin
 
-    var fontLegend = 12;        //default font size
-    var fontLabel = 12;         //default font size
-    var fontValue = 12;         //default font size
-
-    var firstBoxLeftPadding = 44; //Left padding of First Box 
-    var fontValueColor = "rgba(0, 0, 0, 1)";      //default value font color 
+    var fontLegend = 12;
+    var fontLabel = 12;
+    var fontValue = 12;
 
     var dataWidthCount = dataprop.count;
     var dataMaxHeight = dataprop.maxValue;
 
     //box margin 동적 계산
     var calcBoxWidth = Math.round(availableWidth / dataWidthCount);
-    var boxRightMargin = Math.floor(calcBoxWidth * OPT.BoxMarginPercent / 32); //      11/32 %
+    var boxRightMargin = Math.floor(calcBoxWidth * 5 / 32); //      11/32 %
     var boxWidth = calcBoxWidth - boxRightMargin;
 
     CFG = {
@@ -109,12 +106,10 @@ KOSITV.StackedBar = function(pCanvasId) {
       ctxFontLegend: typeof OPT.FontLegend !== "undefined" ? OPT.FontLegend : fontLegend,
       ctxFontLabel:typeof OPT.FontLabel !== "undefined" ? OPT.FontLabel : fontLabel,
       ctxFontValue:typeof OPT.FontValue !== "undefined" ? OPT.FontValue : fontValue,
-      ctxFontValueColor:typeof OPT.FontValueColor !== "undefined" ? OPT.FontValueColor : fontValueColor,
       dataCount: dataWidthCount,
       dataMaxHeight: dataMaxHeight,
       boxRightMargin: boxRightMargin,
       boxWidth: boxWidth,
-      ctxFirstBoxLeftPadding:firstBoxLeftPadding,
       guideColorAlpha: typeof OPT.GuideAlpha !== "undefined" ? OPT.GuideAlpha : 0.5,
       guideFillYN: typeof OPT.GuideFillYN !== "undefined" ? OPT.GuideFillYN : "N",
       onlyGroupBox: typeof OPT.OnlyGroupBox !== "undefined" ? OPT.OnlyGroupBox : "N",
@@ -274,7 +269,7 @@ KOSITV.StackedBar = function(pCanvasId) {
     var dataGroup = arrGroup;
 
     var BoxesAxis = [];
-    var stdLeftMargin = CFG.ctxFirstBoxLeftPadding;
+    var stdLeftMargin = 20;
 
     var boxWidth = CFG.boxWidth;
     var tmpXAxis = CFG.ctxStartX + stdLeftMargin;
@@ -283,9 +278,11 @@ KOSITV.StackedBar = function(pCanvasId) {
       var arr = {
         idx: i,
         X: tmpXAxis,
-        Y: ((maxDataY - dataGroup[i]) / maxDataY * maxCanvasHeight + CFG.ctxStartY),
+        Y:
+          (maxDataY - dataGroup[i]) / maxDataY * maxCanvasHeight +
+          CFG.ctxStartY,
         W: boxWidth,
-        H: (dataGroup[i] / maxDataY * maxCanvasHeight)
+        H: dataGroup[i] / maxDataY * maxCanvasHeight
       }; //X축 계산
       BoxesAxis.push(arr);
       tmpXAxis += CFG.boxWidth + CFG.boxRightMargin;
@@ -542,22 +539,19 @@ KOSITV.StackedBar = function(pCanvasId) {
 
     //###########  하단 단위 표시 작업 #################
     //우측 하단, 단위길이만큼 좌로 이동, 하단에서 margin 적용 
-    if(CFG.useValueUnit != 0 && CFG.useValueUnit != 1){
-      var tBottomFlowUp = 10;
-      var tUnitText = "(1/" + CFG.useValueUnit + ")";
-      var tUnitTextLength = ctx.measureText(tUnitText).width;
-      var tRightEdgeX = CFG.ctxWholeWidth - tUnitTextLength - CFG.ctxRightMargin;
-      var tBottomEdgeY = CFG.ctxWholeHeight - tBottomFlowUp;
-      fnDrawText(ctx, tUnitText, tRightEdgeX, tBottomEdgeY);
-    }
-    
+    var tBottomFlowUp = 10;
+    var tUnitText = "(1/" + CFG.useValueUnit + ")";
+    var tUnitTextLength = ctx.measureText(tUnitText).width;
+    var tRightEdgeX = CFG.ctxWholeWidth - tUnitTextLength - CFG.ctxRightMargin;
+    var tBottomEdgeY = CFG.ctxWholeHeight - tBottomFlowUp;
+    fnDrawText(ctx, tUnitText, tRightEdgeX, tBottomEdgeY);
   };
 
   var fnDrawText = function(ctx, text, xPoint, yPoint) {
     var fontSize = CFG.ctxFontValue;
     ctx.font = fontSize + "pt Calibri";
     ctx.textAlign = "start";
-    ctx.fillStyle = CFG.ctxFontValueColor;
+    ctx.fillStyle = "green";
     ctx.fillText(text, xPoint, yPoint + Math.floor(fontSize/2));
   };
 
@@ -589,8 +583,10 @@ KOSITV.StackedBar = function(pCanvasId) {
   //객체의 Property 존재여부 체크
   var cmmCheckProperty = function(obj) {
     var result = true;
-
-    if(typeof obj === "undefined" || obj == null){
+    var temp = "";
+    try {
+      temp = obj;
+    } catch (e) {
       result = false;
     }
     return result;
@@ -715,8 +711,6 @@ KOSITV.StackedBar = function(pCanvasId) {
         FontLegend:12,
         FontLabel:12,
         FontValue:12,
-        FontValueColor:"rgba(0, 0, 0, 1)",
-        BoxMarginPercent:10,      //내부적으로 Box 좌우여백 비율, 사용자가 전달가능
         useValueUnit:1
       };
 
@@ -727,17 +721,13 @@ KOSITV.StackedBar = function(pCanvasId) {
         if (cmmCheckProperty(opt.useGuideLine)) options.UseGuideLine = opt.useGuideLine;
         if (cmmCheckProperty(opt.onlyGroupBox)) options.OnlyGroupBox = opt.onlyGroupBox;
 
-        if (cmmCheckProperty(opt.legendNameSize)) options.FontLegend = opt.legendNameSize;
-        if (cmmCheckProperty(opt.xAxisNameSize)) options.FontLabel = opt.xAxisNameSize;
-        if (cmmCheckProperty(opt.valueFontSize)) options.FontValue = opt.valueFontSize;
-        if (cmmCheckProperty(opt.valueFontColor)) options.FontValueColor = opt.valueFontColor;
+        if (cmmCheckProperty(opt.FontLegend)) options.FontLegend = opt.legendNameSize;
+        if (cmmCheckProperty(opt.FontLabel)) options.FontLabel = opt.xAxisNameSize;
+        if (cmmCheckProperty(opt.FontValue)) options.FontValue = opt.valueFontSize;
 
         if(cmmCheckProperty(opt.useDisplayValue)) options.UseDisplayValue = opt.useDisplayValue;
         if (cmmCheckProperty(opt.displayValueComma)) options.displayValueComma = opt.displayValueComma;
         if (cmmCheckProperty(opt.useValueUnit)) options.useValueUnit = opt.useValueUnit;
-
-        if (cmmCheckProperty(opt.boxMarginPercent)) 
-          options.BoxMarginPercent = opt.boxMarginPercent;
         //======== user Color option ============
         if (cmmCheckProperty(opt.userColor)){
           for(var i=0;i<opt.userColor.length;i++){

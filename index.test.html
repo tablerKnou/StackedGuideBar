@@ -28,7 +28,7 @@
         <canvas id="tutorial" width="1000" height="800"></canvas>        <!-- Canvas #1 -->
         <canvas id="tutorial2" width="1000" height="600"></canvas>      <!-- Canvas #2 -->
     </div>
-    <script type="text/javascript" language="javascript" src="stackedBarGuide.js"></script>
+    <script type="text/javascript" language="javascript" src="stackedBarGuide.1.21.js"></script>
     <script type="text/javascript" language="javascript">
         window.onload = function(){
            // Document is ready.
@@ -70,9 +70,9 @@
                  ,valueFontSize:14                          //(v.1.21) Value Font Size : default 12(pt)
                  ,displayValueComma: "Y"                    //(v.1.21) Item별 Value값에 Currency Format 적용(Comma) : Y(Comma표시), N(미표시)
                  ,useDisplayValue: "Y"                      //(v.1.21) Item별 Value값 표시 여부 : Y(사용), N(표시하지 않음)
-                 ,useValueUnit: 1000                        //(v.1.21) value의 단위 환산 ex:) ,useValueUnit: 1000 => 1/1000로 변환 
+                 ,useValueUnit: 0                           //(v.1.21) value의 단위 환산 ex:) ,useValueUnit: 1000 => 1/1000로 변환 
                  ,boxMarginPercent:10                       //(v.1.21) Item Box의 좌/우 여백 비율 : default (10%) 
-                 ,valueFontColor:"rgba(0, 0, 0, 1)"   //(v.1.21) value의 색상 RGBA형태의 String사용,  ex: "rgba(0, 0, 0, 1)"
+                 ,valueFontColor:"rgba(250, 250, 250, 1)"   //(v.1.21) value의 색상 RGBA형태의 String사용,  ex: "rgba(0, 0, 0, 1)"
                  ,userColor:["rgba(120, 64, 43, 0.64)","rgba(110, 164, 43, 0.64)","rgba(180, 184, 103, 0.64)"]   //(v.1.01) RGBA 형태의 String 배열 , index 0 = 컬럼 최하단, Alpha(0~1) 
              };
             // 04. init instance
