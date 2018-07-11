@@ -8,7 +8,7 @@
       "name": "Launch localhost",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:8090/canvas_stackedBar.html",
+      "url": "http://localhost:8090/index.test.html",
       "webRoot": "${workspaceFolder}/wwwroot"
     },
     {
@@ -16,7 +16,7 @@
       "type": "chrome",
       "request": "launch",
       "sourceMaps": false,
-      "file": "${workspaceFolder}"
+      "file": "${workspaceFolder}/index.test.html"
     }
   ]
 }
