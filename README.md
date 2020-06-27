@@ -85,4 +85,4 @@ myChart.init(DATA, options);
 
 ## Copyright
 
-Copyright 2018 [KOSITV Project](http://www.kositv.com).
+Copyright 2018. techabler@gmail.com [KOSITV Project](http://www.kositv.com).
